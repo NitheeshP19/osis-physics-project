@@ -1,3 +1,6 @@
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 import pandas as pd
 import joblib
 import numpy as np
@@ -111,9 +114,9 @@ try:
     print("-" * 30)
     
     if r2 > 0.95:
-        print("[SUCCESS] Status: EXCELLENT (Target > 0.95 met)")
+        print("✅ Status: EXCELLENT (Target > 0.95 met)")
     else:
-        print("[WARNING] Status: NEEDS IMPROVEMENT")
+        print("⚠️ Status: NEEDS IMPROVEMENT")
 
 except Exception as e:
     print(f"An error occurred: {e}")

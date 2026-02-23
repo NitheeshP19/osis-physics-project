@@ -1,3 +1,6 @@
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 import numpy as np
 import pandas as pd
 
@@ -159,6 +162,6 @@ columns = [
 df = pd.DataFrame(data, columns=columns)
 df.to_csv(OUTPUT_FILE, index=False)
 
-print(f"[SUCCESS] {OUTPUT_FILE} created successfully with {N_SAMPLES} samples.")
+print(f"✅ {OUTPUT_FILE} created successfully with {N_SAMPLES} samples.")
 print("Columns:", columns)
 
