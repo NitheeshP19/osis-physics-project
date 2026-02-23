@@ -15,9 +15,8 @@ function calculatePhysics() {
             const isi = spotSize / pitch;
             document.getElementById("isi").value = isi.toFixed(4);
 
-            // Crosstalk = exp(-spacing / pitch)
-            // Note: This is a simplified view for the UI. The backend uses a more complex one if needed.
-            const crosstalk = Math.exp(-spacing / pitch);
+            // crosstalk = Math.exp(-0.002 * (track_pitch - spot_size)) to match training logic
+            const crosstalk = Math.exp(-0.002 * (pitch - spotSize));
             document.getElementById("crosstalk").value = crosstalk.toExponential(4);
         }
     }
@@ -52,6 +51,9 @@ async function updateChart(basePayload) {
         const spotSize = (0.61 * payload.laser_wavelength_nm) / na;
         payload.spot_size_nm = spotSize;
         payload.isi_factor = spotSize / payload.track_pitch_nm;
+        
+        // Recompute crosstalk for new spot_size to match training model
+        payload.crosstalk_factor = Math.exp(-0.002 * (payload.track_pitch_nm - spotSize));
         
         return fetch("/predict_snr", {
             method: "POST",
