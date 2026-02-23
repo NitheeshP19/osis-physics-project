@@ -19,10 +19,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def read_root():
     return FileResponse("static/index.html")
 
-@app.get("/physics.html")
-def read_physics():
-    return FileResponse("physics.html")
-
 # -------------------------
 # PHYSICS CONSTANTS
 # -------------------------

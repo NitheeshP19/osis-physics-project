@@ -117,9 +117,9 @@ def train():
     print("-" * 30)
 
     if r2 > 0.95:
-        print("✅ SUCCESS: Target Accuracy (R² > 0.95) Achieved!")
+        print("[SUCCESS] Target Accuracy (R² > 0.95) Achieved!")
     else:
-        print("⚠️ WARNING: Target Accuracy Not Met.")
+        print("[WARNING] Target Accuracy Not Met.")
 
     # =====================================================
     # SAVE ARTIFACTS

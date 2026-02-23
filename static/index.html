@@ -1,396 +1,1050 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OSIS SNR Predictor</title>
-    <style>
-      :root {
-        --primary: #6366f1;
-        --primary-hover: #4f46e5;
-        --bg-dark: #0f172a;
-        --card-bg: rgba(30, 41, 59, 0.7);
-        --text-main: #f8fafc;
-        --text-muted: #94a3b8;
-        --border: rgba(255, 255, 255, 0.1);
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Optical Storage Intelligence System | AI-Based SNR Prediction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-1: #070a1a;
+      --bg-2: #0a1030;
+      --bg-3: #130726;
+      --neon-cyan: #34f5ff;
+      --neon-purple: #9a6bff;
+      --text-main: #eef2ff;
+      --text-soft: #b9c2ea;
+      --glass-bg: rgba(255, 255, 255, 0.06);
+      --glass-border: rgba(255, 255, 255, 0.18);
+      --divider: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-purple), transparent);
+      --card-shadow: 0 10px 35px rgba(0, 0, 0, 0.35), 0 0 20px rgba(52, 245, 255, 0.12);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at 10% 10%, #10173f 0%, transparent 30%),
+                  radial-gradient(circle at 90% 20%, #2a0f4d 0%, transparent 30%),
+                  linear-gradient(120deg, var(--bg-1), var(--bg-2), var(--bg-3));
+      background-size: 200% 200%;
+      animation: bgFlow 16s ease infinite;
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    #particle-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .overlay-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      background: radial-gradient(circle at 20% 30%, rgba(0, 204, 255, 0.12), transparent 35%),
+                  radial-gradient(circle at 80% 70%, rgba(154, 107, 255, 0.14), transparent 40%);
+      filter: blur(20px);
+    }
+
+    .container {
+      width: min(1150px, 92%);
+      margin: auto;
+    }
+
+    section {
+      padding: 70px 0;
+      position: relative;
+    }
+
+    .section-divider {
+      height: 2px;
+      width: min(500px, 85%);
+      margin: 0 auto;
+      background: var(--divider);
+      opacity: 0.85;
+      border-radius: 999px;
+      box-shadow: 0 0 14px rgba(52, 245, 255, 0.3);
+    }
+
+    .glass {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: var(--card-shadow);
+      border-radius: 18px;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+      letter-spacing: 0.03em;
+      margin-bottom: 18px;
+      text-align: center;
+      color: #f6f8ff;
+      text-shadow: 0 0 18px rgba(52, 245, 255, 0.35);
+    }
+
+    .section-subtitle {
+      max-width: 760px;
+      margin: 0 auto 36px;
+      text-align: center;
+      color: var(--text-soft);
+      font-size: 1rem;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 80px 0;
+    }
+
+    .hero-panel {
+      padding: clamp(24px, 5vw, 52px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-panel::before {
+      content: '';
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(52, 245, 255, 0.28), transparent 70%);
+      top: -80px;
+      right: -50px;
+      animation: pulseGlow 4.2s ease-in-out infinite;
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.8rem);
+      line-height: 1.2;
+      margin-bottom: 18px;
+      text-shadow: 0 0 30px rgba(0, 204, 255, 0.32);
+    }
+
+    .hero .subtitle {
+      color: var(--neon-cyan);
+      font-weight: 500;
+      font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+      margin-bottom: 16px;
+      letter-spacing: 0.04em;
+    }
+
+    .hero p {
+      max-width: 770px;
+      margin: 0 auto 28px;
+      color: var(--text-soft);
+    }
+
+    .cta-btn {
+      border: 1px solid rgba(52, 245, 255, 0.55);
+      color: #ecfeff;
+      background: linear-gradient(90deg, rgba(0, 204, 255, 0.15), rgba(154, 107, 255, 0.2));
+      padding: 13px 28px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.98rem;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+      box-shadow: 0 0 16px rgba(0, 204, 255, 0.25);
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      border-color: rgba(154, 107, 255, 0.8);
+      box-shadow: 0 0 24px rgba(154, 107, 255, 0.35), 0 0 30px rgba(0, 204, 255, 0.25);
+    }
+
+    .about-grid,
+    .feature-grid,
+    .tech-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card {
+      padding: 22px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(52, 245, 255, 0.5);
+      box-shadow: 0 0 16px rgba(52, 245, 255, 0.15);
+    }
+
+    .icon {
+      font-size: 1.6rem;
+      margin-bottom: 10px;
+      display: inline-block;
+      filter: drop-shadow(0 0 8px rgba(52, 245, 255, 0.35));
+    }
+
+    .card h3 {
+      font-size: 1.04rem;
+      margin-bottom: 8px;
+      color: #f0f5ff;
+    }
+
+    .card p {
+      color: var(--text-soft);
+      font-size: 0.95rem;
+    }
+
+    .steps-wrap {
+      position: relative;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-top: 8px;
+    }
+
+    .steps-line {
+      position: absolute;
+      height: 3px;
+      left: 7%;
+      right: 7%;
+      top: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(90deg, rgba(0, 204, 255, 0.65), rgba(154, 107, 255, 0.7));
+      box-shadow: 0 0 15px rgba(52, 245, 255, 0.35);
+      border-radius: 999px;
+      z-index: 0;
+    }
+
+    .step-card {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 22px 16px;
+      background: rgba(10, 18, 48, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+    }
+
+    .step-number {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      margin: 0 auto 10px;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, rgba(0, 204, 255, 0.26), rgba(154, 107, 255, 0.34));
+      border: 1px solid rgba(52, 245, 255, 0.7);
+      box-shadow: 0 0 14px rgba(0, 204, 255, 0.25);
+    }
+
+    .feature-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .feature-card {
+      text-align: center;
+      padding: 20px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 0 14px rgba(154, 107, 255, 0.13);
+    }
+
+    .feature-card strong {
+      display: block;
+      color: #f4f7ff;
+      font-size: 0.95rem;
+    }
+
+    .chart-panel {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(9, 14, 32, 0.78);
+    }
+
+    .chart-caption {
+      text-align: center;
+      color: var(--neon-cyan);
+      margin-top: 14px;
+      font-size: 0.94rem;
+      letter-spacing: 0.01em;
+    }
+
+    .tech-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .tech-card {
+      text-align: center;
+      padding: 20px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      font-weight: 500;
+      color: #eef5ff;
+    }
+
+    .detail-block {
+      padding: 28px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(9, 14, 36, 0.72);
+      box-shadow: 0 0 20px rgba(52, 245, 255, 0.08);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .detail-card {
+      padding: 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.04);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .detail-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--neon-cyan), var(--neon-purple));
+      box-shadow: 0 0 12px rgba(52, 245, 255, 0.35);
+    }
+
+    .detail-card h3 {
+      font-size: 1rem;
+      color: #edf4ff;
+      margin-bottom: 8px;
+      padding-left: 10px;
+    }
+
+    .detail-card p {
+      font-size: 0.95rem;
+      color: var(--text-soft);
+      padding-left: 10px;
+    }
+
+    .landscape-list,
+    .achievement-list,
+    .future-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .list-item {
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-soft);
+    }
+
+    .list-item strong {
+      color: #f4f8ff;
+      font-weight: 600;
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .app-card {
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.17);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .app-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: #f4f8ff;
+    }
+
+    .app-card ul {
+      padding-left: 18px;
+      display: grid;
+      gap: 6px;
+      color: var(--text-soft);
+      font-size: 0.95rem;
+    }
+
+    .future-card {
+      margin-top: 16px;
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: linear-gradient(130deg, rgba(0, 204, 255, 0.08), rgba(154, 107, 255, 0.08));
+    }
+
+    .predictor-panel {
+      padding: 30px;
+    }
+
+    .predictor-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .predictor-section-title {
+      grid-column: 1 / -1;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-soft);
+      margin-top: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+      padding-bottom: 0.45rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-soft);
+    }
+
+    input,
+    select {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      color: var(--text-main);
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 0 2px rgba(52, 245, 255, 0.2);
+    }
+
+    input:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .submit-btn {
+      grid-column: 1 / -1;
+      border: 1px solid rgba(52, 245, 255, 0.55);
+      color: #ecfeff;
+      background: linear-gradient(90deg, rgba(0, 204, 255, 0.15), rgba(154, 107, 255, 0.2));
+      padding: 0.95rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .submit-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    #result {
+      grid-column: 1 / -1;
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      text-align: center;
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    #result h2 {
+      margin: 0;
+      color: #34d399;
+      font-size: 1.4rem;
+    }
+
+    #result .value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #34d399;
+      margin-top: 0.5rem;
+    }
+
+    .chart-container {
+      margin-top: 1.5rem;
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+
+    .footer {
+      padding: 36px 0 50px;
+      text-align: center;
+      color: #bdc8ef;
+      font-size: 0.93rem;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1080px) {
+      .feature-grid,
+      .tech-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
-      body {
-        font-family:
-          "Inter",
-          system-ui,
-          -apple-system,
-          sans-serif;
-			background: radial-gradient(circle at 10% 10%, #10173f 0%, transparent 30%),
-									radial-gradient(circle at 90% 20%, #2a0f4d 0%, transparent 30%),
-									linear-gradient(120deg, #070a1a, #0a1030, #130726);
-			background-size: 200% 200%;
-			animation: bgFlow 16s ease infinite;
-        color: var(--text-main);
-        margin: 0;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 2rem;
-      }
-      @keyframes bgFlow {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
+      .steps-wrap {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      #particle-canvas {
-        position: fixed;
-        inset: 0;
-        z-index: -2;
-        pointer-events: none;
+      .steps-line {
+        display: none;
       }
 
-      .overlay-glow {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: -1;
-        background: radial-gradient(circle at 20% 30%, rgba(0, 204, 255, 0.12), transparent 35%),
-                    radial-gradient(circle at 80% 70%, rgba(154, 107, 255, 0.14), transparent 40%);
-        filter: blur(20px);
+      .detail-grid,
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      section {
+        padding: 56px 0;
       }
 
-      .container {
-        width: 100%;
-        max-width: 800px;
-        background: var(--card-bg);
-        backdrop-filter: blur(12px);
-        border: 1px solid var(--border);
-        border-radius: 1rem;
-        padding: 2.5rem;
-        box-shadow:
-          0 4px 6px -1px rgba(0, 0, 0, 0.1),
-          0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        position: relative;
-        z-index: 1;
-      }
-      
-      header {
-        text-align: center;
-        margin-bottom: 2.5rem;
+      .about-grid,
+      .feature-grid,
+      .tech-grid,
+      .steps-wrap,
+      .detail-grid,
+      .app-grid {
+        grid-template-columns: 1fr;
       }
 
-      h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        background: linear-gradient(to right, #818cf8, #c084fc);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin: 0 0 0.5rem 0;
+      .hero-panel {
+        padding: 24px 20px;
       }
 
-      p.subtitle {
-        color: var(--text-muted);
-        margin: 0;
+      .predictor-panel {
+        padding: 20px;
       }
+    }
 
-      form {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1.5rem;
+    @keyframes bgFlow {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
       }
-
-      .section-title {
-        grid-column: 1 / -1;
-        font-size: 0.875rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--text-muted);
-        margin-top: 1rem;
-        border-bottom: 1px solid var(--border);
-        padding-bottom: 0.5rem;
-      }
-
-      .input-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      label {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: var(--text-muted);
-      }
-
-      input,
-      select {
-        background: rgba(15, 23, 42, 0.5);
-        border: 1px solid var(--border);
-        border-radius: 0.5rem;
-        padding: 0.75rem;
-        color: var(--text-main);
-        font-size: 1rem;
-        transition: all 0.2s;
-      }
-
-      input:focus,
-      select:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-      }
-
-      input:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-        background: rgba(15, 23, 42, 0.8);
-      }
-
-      .submit-btn {
-        grid-column: 1 / -1;
-        background: linear-gradient(
-          to right,
-          var(--primary),
-          var(--primary-hover)
-        );
-        color: white;
-        border: none;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        font-weight: 600;
-        font-size: 1rem;
-        cursor: pointer;
-        transition:
-          transform 0.1s,
-          opacity 0.2s;
-        margin-top: 1rem;
-      }
-
-      .submit-btn:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-      }
-
-      .submit-btn:active {
+      to {
+        opacity: 1;
         transform: translateY(0);
       }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+  <div class="overlay-glow" aria-hidden="true"></div>
 
-      #result {
-        grid-column: 1 / -1;
-        margin-top: 2rem;
-        padding: 1.5rem;
-        border-radius: 0.75rem;
-        background: rgba(16, 185, 129, 0.1);
-        border: 1px solid rgba(16, 185, 129, 0.2);
-        text-align: center;
-        display: none;
-        animation: fadeIn 0.3s ease-out;
-      }
-
-      #result h2 {
-        margin: 0;
-        color: #34d399;
-        font-size: 1.5rem;
-      }
-
-      #result .value {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: #34d399;
-        margin-top: 0.5rem;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-      .chart-container {
-        margin-top: 2rem;
-        position: relative;
-        height: 300px;
-        width: 100%;
-      }
-    </style>
-  </head>
-  <body>
-    <canvas id="particle-canvas" aria-hidden="true"></canvas>
-    <div class="overlay-glow" aria-hidden="true"></div>
-
+  <section class="hero">
     <div class="container">
-      <header>
-        <h1>OSIS SNR Predictor</h1>
-        <p class="subtitle">Optical Storage Intelligence System</p>
-      </header>
+      <div class="hero-panel glass reveal">
+        <h1>Optical Storage Intelligence System<br />AI-Based Signal-to-Noise Ratio Prediction</h1>
+        <div class="subtitle">Intelligent Machine Learning Framework for High-Precision SNR Prediction</div>
+        <p>
+          A futuristic research-driven concept platform that presents how intelligent machine learning can model,
+          analyze, and forecast Signal-to-Noise Ratio behavior in optical storage environments with superior precision.
+        </p>
+        <a href="#predictor" class="cta-btn">Explore the System</a>
+      </div>
+    </div>
+  </section>
 
-      <form id="osisForm">
-        <div class="section-title">Optical Parameters</div>
+  <div class="section-divider"></div>
 
-        <div class="input-group">
-          <label for="wavelength">Laser Wavelength (nm)</label>
-          <input type="number" id="wavelength" step="1" value="405" required />
-        </div>
+  <section id="about" class="reveal">
+    <div class="container">
+      <h2 class="section-title">About the Project</h2>
+      <p class="section-subtitle">Understanding the science behind SNR and the role of AI in advancing optical storage intelligence.</p>
+      <div class="about-grid">
+        <article class="card glass">
+          <span class="icon">SNR</span>
+          <h3>What is Signal-to-Noise Ratio (SNR)?</h3>
+          <p>SNR measures the clarity of a useful signal against background noise, indicating how cleanly data can be interpreted.</p>
+        </article>
+        <article class="card glass">
+          <span class="icon">OPT</span>
+          <h3>Why SNR Matters in Optical Storage</h3>
+          <p>Higher SNR enables more reliable read/write operations, better data integrity, and stronger performance in storage systems.</p>
+        </article>
+        <article class="card glass">
+          <span class="icon">CHL</span>
+          <h3>The Prediction Challenge</h3>
+          <p>Traditional methods struggle with nonlinear optical behaviors and environmental variations, reducing prediction consistency.</p>
+        </article>
+        <article class="card glass">
+          <span class="icon">AI</span>
+          <h3>How AI Improves Precision</h3>
+          <p>Machine learning captures complex patterns across parameters and provides more robust, high-accuracy SNR estimations.</p>
+        </article>
+      </div>
+    </div>
+  </section>
 
-        <div class="input-group">
-          <label for="na">Numerical Aperture (NA)</label>
-          <input type="number" id="na" step="0.01" value="0.85" required />
-        </div>
+  <div class="section-divider"></div>
 
-        <div class="input-group">
-          <label for="track_pitch">Track Pitch (nm)</label>
-          <input type="number" id="track_pitch" step="1" value="225" required />
-        </div>
+  <section id="workflow" class="reveal">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-subtitle">A simplified four-stage intelligence pipeline for conceptual SNR prediction flow.</p>
+      <div class="steps-wrap">
+        <div class="steps-line"></div>
+        <article class="step-card glass card">
+          <div class="step-number">1</div>
+          <h3>Input Optical Parameters</h3>
+          <p>System captures key optical and environmental variables from simulation-ready datasets.</p>
+        </article>
+        <article class="step-card glass card">
+          <div class="step-number">2</div>
+          <h3>ML Model Processing</h3>
+          <p>Data is transformed and passed into trained machine learning models for intelligent signal analysis.</p>
+        </article>
+        <article class="step-card glass card">
+          <div class="step-number">3</div>
+          <h3>Intelligent Prediction Engine</h3>
+          <p>The engine computes learned nonlinear relationships to estimate high-fidelity SNR outputs.</p>
+        </article>
+        <article class="step-card glass card">
+          <div class="step-number">4</div>
+          <h3>High-Accuracy SNR Output</h3>
+          <p>Predicted SNR values are generated for performance evaluation and optical system optimization.</p>
+        </article>
+      </div>
+    </div>
+  </section>
 
-        <div class="input-group">
-          <label for="spot_size">Calculated Spot Size (nm)</label>
-          <input type="number" id="spot_size" readonly disabled />
-        </div>
+  <div class="section-divider"></div>
 
-        <div class="section-title">Structure & Material</div>
+  <section id="features" class="reveal">
+    <div class="container">
+      <h2 class="section-title">Feature Highlights</h2>
+      <p class="section-subtitle">Core capabilities showcased as a modern research and portfolio presentation.</p>
+      <div class="feature-grid">
+        <article class="feature-card card glass"><strong>AI-Based Prediction</strong></article>
+        <article class="feature-card card glass"><strong>High R-Value Accuracy (98.56%)</strong></article>
+        <article class="feature-card card glass"><strong>Software-Based Simulation</strong></article>
+        <article class="feature-card card glass"><strong>Graphical Data Visualization</strong></article>
+        <article class="feature-card card glass"><strong>Research-Ready Framework</strong></article>
+      </div>
+    </div>
+  </section>
 
-        <div class="input-group">
-          <label for="layer_count">Layer Count</label>
-          <select id="layer_count">
-            <option value="1">1 Layer</option>
-            <option value="2">2 Layers</option>
-            <option value="3">3 Layers</option>
-          </select>
-        </div>
+  <div class="section-divider"></div>
 
-        <div class="input-group">
-          <label for="layer_spacing">Layer Spacing (nm)</label>
-          <input type="number" id="layer_spacing" step="100" value="20000" />
-        </div>
+  <section id="graph" class="reveal">
+    <div class="container">
+      <h2 class="section-title">Graph Demonstration</h2>
+      <p class="section-subtitle">Static demo data representing AI-predicted SNR trends across optical parameter ranges.</p>
+      <div class="chart-panel glass">
+        <canvas id="snrTrendChart" height="120"></canvas>
+      </div>
+      <p class="chart-caption">Sample Visualization of AI-Predicted SNR Trends</p>
+    </div>
+  </section>
 
-        <div class="input-group">
-          <label for="material">Recording Material</label>
-          <select id="material">
-            <option value="GST_HTL">GST_HTL (Phase Change)</option>
-            <option value="DYE_LTH">DYE_LTH (Organic Dye)</option>
-            <option value="MDISC">MDISC (Stone-like)</option>
-          </select>
-        </div>
+  <div class="section-divider"></div>
 
-        <div class="section-title">Physics Factors (Auto-Calculated)</div>
+  <section id="technology" class="reveal">
+    <div class="container">
+      <h2 class="section-title">Technology Stack</h2>
+      <p class="section-subtitle">Disciplines and engineering domains powering this AI-focused optical storage concept.</p>
+      <div class="tech-grid">
+        <article class="tech-card card glass">Machine Learning</article>
+        <article class="tech-card card glass">Python</article>
+        <article class="tech-card card glass">Data Modeling</article>
+        <article class="tech-card card glass">Signal Processing</article>
+        <article class="tech-card card glass">Optical Engineering</article>
+      </div>
+    </div>
+  </section>
 
-        <div class="input-group">
-          <label for="isi">ISI Factor</label>
-          <input type="number" id="isi" readonly disabled />
-        </div>
+  <div class="section-divider"></div>
 
-        <div class="input-group">
-          <label for="crosstalk">Crosstalk Factor</label>
-          <input type="number" id="crosstalk" readonly disabled />
-        </div>
+  <section id="predictor" class="reveal">
+    <div class="container">
+      <h2 class="section-title">Interactive SNR Predictor</h2>
+      <p class="section-subtitle">Run real model predictions directly in the same page.</p>
+      <div class="predictor-panel glass">
+        <form id="osisForm" class="predictor-form">
+          <div class="predictor-section-title">Optical Parameters</div>
 
-        <div class="section-title">Environmental & System</div>
+          <div class="input-group">
+            <label for="wavelength">Laser Wavelength (nm)</label>
+            <input type="number" id="wavelength" step="1" value="405" required />
+          </div>
 
-        <div class="input-group">
-          <label for="thermal_k">Thermal Conductivity (W/mK)</label>
-          <input type="number" id="thermal_k" step="0.1" value="1.5" />
-        </div>
+          <div class="input-group">
+            <label for="na">Numerical Aperture (NA)</label>
+            <input type="number" id="na" step="0.01" value="0.85" required />
+          </div>
 
-        <div class="input-group">
-          <label for="activation_e">Activation Energy (eV)</label>
-          <input type="number" id="activation_e" step="0.1" value="2.0" />
-        </div>
+          <div class="input-group">
+            <label for="track_pitch">Track Pitch (nm)</label>
+            <input type="number" id="track_pitch" step="1" value="225" required />
+          </div>
 
-        <div class="input-group">
-          <label for="temp">Temperature (°C)</label>
-          <input type="number" id="temp" step="1" value="25" />
-        </div>
+          <div class="input-group">
+            <label for="spot_size">Calculated Spot Size (nm)</label>
+            <input type="number" id="spot_size" readonly disabled />
+          </div>
 
-        <div class="input-group">
-          <label for="humidity">Relative Humidity (%)</label>
-          <input type="number" id="humidity" step="1" value="45" />
-        </div>
+          <div class="predictor-section-title">Structure & Material</div>
 
-        <div class="input-group">
-          <label for="prml">PRML Enabled</label>
-          <select id="prml">
-            <option value="1">Yes</option>
-            <option value="0">No</option>
-          </select>
-        </div>
+          <div class="input-group">
+            <label for="layer_count">Layer Count</label>
+            <select id="layer_count">
+              <option value="1">1 Layer</option>
+              <option value="2">2 Layers</option>
+              <option value="3">3 Layers</option>
+            </select>
+          </div>
 
-        <div class="input-group">
-          <label for="ctc">CTC Enabled</label>
-          <select id="ctc">
-            <option value="1">Yes</option>
-            <option value="0">No</option>
-          </select>
-        </div>
+          <div class="input-group">
+            <label for="layer_spacing">Layer Spacing (nm)</label>
+            <input type="number" id="layer_spacing" step="100" value="20000" />
+          </div>
 
-        <button type="submit" class="submit-btn">Predict SNR</button>
-      </form>
+          <div class="input-group">
+            <label for="material">Recording Material</label>
+            <select id="material">
+              <option value="GST_HTL">GST_HTL (Phase Change)</option>
+              <option value="DYE_LTH">DYE_LTH (Organic Dye)</option>
+              <option value="MDISC">MDISC (Stone-like)</option>
+            </select>
+          </div>
 
-      <div id="result">
-        <h2>Predicted Signal-to-Noise Ratio</h2>
-        <div class="value" id="snrValue">-- dB</div>
-        <div class="chart-container">
-            <canvas id="snrChart"></canvas>
+          <div class="predictor-section-title">Physics Factors (Auto-Calculated)</div>
+
+          <div class="input-group">
+            <label for="isi">ISI Factor</label>
+            <input type="number" id="isi" readonly disabled />
+          </div>
+
+          <div class="input-group">
+            <label for="crosstalk">Crosstalk Factor</label>
+            <input type="number" id="crosstalk" readonly disabled />
+          </div>
+
+          <div class="predictor-section-title">Environmental & System</div>
+
+          <div class="input-group">
+            <label for="thermal_k">Thermal Conductivity (W/mK)</label>
+            <input type="number" id="thermal_k" step="0.1" value="1.5" />
+          </div>
+
+          <div class="input-group">
+            <label for="activation_e">Activation Energy (eV)</label>
+            <input type="number" id="activation_e" step="0.1" value="2.0" />
+          </div>
+
+          <div class="input-group">
+            <label for="temp">Temperature (°C)</label>
+            <input type="number" id="temp" step="1" value="25" />
+          </div>
+
+          <div class="input-group">
+            <label for="humidity">Relative Humidity (%)</label>
+            <input type="number" id="humidity" step="1" value="45" />
+          </div>
+
+          <div class="input-group">
+            <label for="prml">PRML Enabled</label>
+            <select id="prml">
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="ctc">CTC Enabled</label>
+            <select id="ctc">
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+          </div>
+
+          <button type="submit" class="submit-btn">Predict SNR</button>
+
+          <div id="result">
+            <h2>Predicted Signal-to-Noise Ratio</h2>
+            <div class="value" id="snrValue">-- dB</div>
+            <div class="chart-container">
+              <canvas id="snrChart"></canvas>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <section id="model-features" class="reveal">
+    <div class="container">
+      <h2 class="section-title">Model Features</h2>
+      <p class="section-subtitle">Detailed technical capabilities of the software-based machine learning framework for optical SNR prediction.</p>
+      <div class="detail-block glass">
+        <div class="detail-grid">
+          <article class="detail-card">
+            <h3>AI-Driven SNR Prediction Mechanism</h3>
+            <p>The framework learns nonlinear mappings between optical input variables and SNR response, enabling inference beyond conventional analytical approximations.</p>
+          </article>
+          <article class="detail-card">
+            <h3>High-Accuracy Regression Modeling</h3>
+            <p>Regression performance reaches R² ≈ 0.9856, indicating tight alignment between predicted and reference values across controlled simulation scenarios.</p>
+          </article>
+          <article class="detail-card">
+            <h3>Software-Only Simulation Pipeline</h3>
+            <p>The complete workflow operates without dedicated physical hardware, allowing rapid experimentation in reproducible computational environments.</p>
+          </article>
+          <article class="detail-card">
+            <h3>Real-Time Parameter Sensitivity Analysis</h3>
+            <p>Model response can be inspected against parameter perturbations to quantify sensitivity, helping identify dominant contributors to SNR variation.</p>
+          </article>
+          <article class="detail-card">
+            <h3>Data-Driven Optical Performance Optimization</h3>
+            <p>Predicted outcomes support parameter-space exploration for improved signal quality and more informed operating-point selection.</p>
+          </article>
+          <article class="detail-card">
+            <h3>Predicted SNR Trend Visualization</h3>
+            <p>Graphical trend views convert numerical outputs into interpretable behavior signatures for technical review, reporting, and comparative analysis.</p>
+          </article>
         </div>
       </div>
     </div>
+  </section>
 
-    <script>
-      const canvas = document.getElementById('particle-canvas');
-      const context = canvas.getContext('2d');
-      const particles = [];
-      const particleCount = 55;
+  <div class="section-divider"></div>
 
-      function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
+  <section id="technology-landscape" class="reveal">
+    <div class="container">
+      <h2 class="section-title">Current Technology Landscape</h2>
+      <p class="section-subtitle">Positioning this system against established optical storage testing practices and emerging AI-driven methodologies.</p>
+      <div class="detail-block glass landscape-list">
+        <div class="list-item"><strong>Traditional SNR Measurement:</strong> Optical storage quality is commonly validated through direct signal acquisition and post-process SNR computation under controlled lab conditions.</div>
+        <div class="list-item"><strong>Hardware Signal Testing & Calibration:</strong> Conventional workflows depend on oscilloscopes, photodetector chains, calibrated laser modules, and repeated bench-level calibration procedures.</div>
+        <div class="list-item"><strong>Limitations of Conventional Testing:</strong> Physical setups are cost-intensive, time-consuming, and constrained in exploring broad multidimensional parameter spaces.</div>
+        <div class="list-item"><strong>Role of DSP in Optical Systems:</strong> Digital Signal Processing remains central for filtering, equalization, denoising, and symbol-level interpretation in optical channels.</div>
+        <div class="list-item"><strong>Emerging AI/ML Adoption:</strong> Optical engineering increasingly incorporates machine learning for pattern discovery, inverse modeling, and predictive error minimization.</div>
+      </div>
+    </div>
+  </section>
 
-      function createParticles() {
-        particles.length = 0;
-        for (let i = 0; i < particleCount; i++) {
-          particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            radius: Math.random() * 2 + 0.8,
-            vx: (Math.random() - 0.5) * 0.4,
-            vy: (Math.random() - 0.5) * 0.4
-          });
+  <div class="section-divider"></div>
+
+  <section id="applications" class="reveal">
+    <div class="container">
+      <h2 class="section-title">Industrial and Future Applications</h2>
+      <p class="section-subtitle">Practical value across manufacturing, research, photonics development, and future autonomous optical ecosystems.</p>
+      <div class="detail-block glass">
+        <div class="app-grid">
+          <article class="app-card">
+            <h3>A. Optical Storage Manufacturers</h3>
+            <ul>
+              <li>Performance optimization before fabrication through predictive signal quality estimates.</li>
+              <li>Reduced prototype cycles by screening parameter combinations in software first.</li>
+              <li>Predictive quality-control benchmarking for consistent product-level signal integrity.</li>
+            </ul>
+          </article>
+          <article class="app-card">
+            <h3>B. Research & Development Labs</h3>
+            <ul>
+              <li>Simulation-based testing for rapid hypothesis validation across multiple optical conditions.</li>
+              <li>Faster experimentation cycles with lower setup overhead and reproducible experiments.</li>
+              <li>Data-driven research workflows that improve statistical confidence in model outcomes.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">Developed as an Intelligent Optical Storage Research System</div>
+  </footer>
+
+  <script>
+    const revealElements = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
         }
-      }
-
-      function drawParticles() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        for (let i = 0; i < particles.length; i++) {
-          const particle = particles[i];
-          context.beginPath();
-          context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-          context.fillStyle = i % 2 === 0 ? 'rgba(52, 245, 255, 0.55)' : 'rgba(154, 107, 255, 0.45)';
-          context.fill();
-
-          particle.x += particle.vx;
-          particle.y += particle.vy;
-
-          if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
-          if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
-        }
-        requestAnimationFrame(drawParticles);
-      }
-
-      window.addEventListener('resize', () => {
-        resizeCanvas();
-        createParticles();
       });
+    }, { threshold: 0.18 });
 
+    revealElements.forEach((element) => revealObserver.observe(element));
+
+    const trendCtx = document.getElementById('snrTrendChart');
+    new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels: ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8'],
+        datasets: [{
+          label: 'Predicted SNR (dB)',
+          data: [18.4, 20.1, 22.8, 24.3, 25.6, 27.2, 28.1, 29.5],
+          borderColor: '#34f5ff',
+          backgroundColor: 'rgba(52, 245, 255, 0.14)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointBackgroundColor: '#9a6bff',
+          pointBorderColor: '#ecfeff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: {
+          duration: 1800,
+          easing: 'easeOutQuart'
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#dce7ff'
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#b8c5ef' },
+            grid: { color: 'rgba(255,255,255,0.08)' }
+          },
+          y: {
+            ticks: { color: '#b8c5ef' },
+            grid: { color: 'rgba(255,255,255,0.08)' }
+          }
+        }
+      }
+    });
+
+    const canvas = document.getElementById('particle-canvas');
+    const context = canvas.getContext('2d');
+    const particles = [];
+    const particleCount = 55;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function createParticles() {
+      particles.length = 0;
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 2 + 0.8,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4
+        });
+      }
+    }
+
+    function drawParticles() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        const particle = particles[i];
+        context.beginPath();
+        context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+        context.fillStyle = i % 2 === 0 ? 'rgba(52, 245, 255, 0.55)' : 'rgba(154, 107, 255, 0.45)';
+        context.fill();
+
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+
+        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
+        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
+      }
+      requestAnimationFrame(drawParticles);
+    }
+
+    window.addEventListener('resize', () => {
       resizeCanvas();
       createParticles();
-      drawParticles();
-    </script>
-    <script src="/static/app.js"></script>
-  </body>
+    });
+
+    resizeCanvas();
+    createParticles();
+    drawParticles();
+  </script>
+  <script src="/static/app.js"></script>
+</body>
 </html>
