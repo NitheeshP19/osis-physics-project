@@ -82,11 +82,13 @@ def train():
     
     gb_model = GradientBoostingRegressor(
         n_estimators=400,
-        learning_rate=0.05,
-        max_depth=4,
+        learning_rate=0.08,
+        max_depth=5,
+        min_samples_split=2,
+        min_samples_leaf=1,
         random_state=42,
         validation_fraction=0.1,
-        n_iter_no_change=10
+        n_iter_no_change=20
     )
     
     gb_model.fit(X_train, y_train)
@@ -122,8 +124,8 @@ def train():
     print(f"MAE:  {mae:.4f} dB")
     print("-" * 30)
 
-    if r2 > 0.95:
-        print("✅ SUCCESS: Target Accuracy (R² > 0.95) Achieved!")
+    if r2 > 0.99:
+        print("✅ SUCCESS: Target Accuracy (R² > 0.99) Achieved!")
     else:
         print("⚠️ WARNING: Target Accuracy Not Met.")
 

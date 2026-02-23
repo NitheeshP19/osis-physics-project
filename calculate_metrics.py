@@ -116,8 +116,8 @@ try:
     print(f"Mean Absolute Error (MAE): {mae:.4f} dB")
     print("-" * 30)
     
-    if r2 > 0.95:
-        print("✅ Status: EXCELLENT (Target > 0.95 met)")
+    if r2 > 0.99:
+        print("✅ Status: EXCELLENT (Target > 0.99 met)")
     else:
         print("⚠️ Status: NEEDS IMPROVEMENT")
 

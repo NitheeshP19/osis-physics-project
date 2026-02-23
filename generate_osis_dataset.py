@@ -105,7 +105,7 @@ for _ in range(N_SAMPLES):
     physics_snr = calculate_physics_snr(wl, NA, isi, crosstalk, thermal_f)
     
     # Add small noise to physics_snr as requested ("smooth curves")
-    physics_snr += np.random.normal(0, 0.2)
+    physics_snr += np.random.normal(0, 0.05)
 
     # 2. Simulate "Measured" SNR with Non-linear Interactions
     # These are the "residuals" the ML model will learn
@@ -137,7 +137,7 @@ for _ in range(N_SAMPLES):
                     - layer_penalty 
                     + prml_gain 
                     + ctc_gain 
-                    + np.random.normal(0, 0.5)) # Small measurement noise
+                    + np.random.normal(0, 0.15)) # Small measurement noise
 
     # Ensure SNR doesn't go below physical floor
     measured_snr = max(measured_snr, 1.0)
