@@ -6,7 +6,7 @@
   <title>Optical Storage Intelligence System | AI-Based SNR Prediction</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Orbitron:wght@500;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -29,9 +29,6 @@
       box-sizing: border-box;
     }
 
-    html {
-      scroll-behavior: smooth;
-    }
 
     body {
       font-family: 'Poppins', sans-serif;
@@ -496,9 +493,8 @@
       margin-top: 1.5rem;
       padding: 1.5rem;
       border-radius: 0.75rem;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      text-align: center;
+      background: rgba(148, 163, 184, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.25);
       display: none;
       animation: fadeIn 0.3s ease-out;
     }
@@ -514,6 +510,97 @@
       font-weight: 800;
       color: #34d399;
       margin-top: 0.5rem;
+    }
+
+    .result-grid {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric-card {
+      padding: 14px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      text-align: left;
+    }
+
+    .metric-label {
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #e9f4ff;
+    }
+
+    .result-section {
+      margin-top: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.5);
+      padding: 14px;
+    }
+
+    .result-section h3 {
+      font-size: 0.95rem;
+      color: #d9e7ff;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    .meta-line {
+      margin-top: 8px;
+      color: var(--text-soft);
+      font-size: 0.86rem;
+      text-align: left;
+    }
+
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      color: #e8f2ff;
+    }
+
+    .result-table th,
+    .result-table td {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .result-table th {
+      color: #b9c7ee;
+      font-weight: 600;
+    }
+
+    .sensitivity-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .sensitivity-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 0.88rem;
+    }
+
+    .tiny {
+      font-size: 0.82rem;
+      color: var(--text-soft);
     }
 
     .chart-container {
@@ -559,6 +646,10 @@
       .app-grid {
         grid-template-columns: 1fr;
       }
+
+      .result-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 760px) {
@@ -572,6 +663,10 @@
       .steps-wrap,
       .detail-grid,
       .app-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .result-grid {
         grid-template-columns: 1fr;
       }
 
@@ -604,9 +699,136 @@
         transform: translateY(0);
       }
     }
+
+    /* Futuristic Header Styles */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 18px 0;
+      z-index: 1000;
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      background: rgba(7, 10, 26, 0.75);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 28px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .header.scrolled {
+      padding: 12px 0;
+      box-shadow: 0 6px 32px rgba(0, 0, 0, 0.4);
+      background: rgba(10, 16, 48, 0.88);
+      border-bottom: 1px solid rgba(52, 245, 255, 0.15);
+    }
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #f6f8ff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(52, 245, 255, 0.3);
+      transition: transform 0.4s;
+    }
+    .logo:hover {
+      transform: scale(1.02);
+      color: var(--neon-cyan);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 34px;
+    }
+    .nav-links a {
+      font-family: 'Poppins', sans-serif;
+      color: var(--text-soft);
+      text-decoration: none;
+      font-size: 1.05rem;
+      font-weight: 500;
+      letter-spacing: 0.8px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--divider);
+      transition: width 0.3s ease-in-out;
+    }
+    .nav-links a:hover {
+      color: var(--text-main);
+    }
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+    .nav-cta {
+      border: 1px solid rgba(52, 245, 255, 0.55) !important;
+      color: #ecfeff !important;
+      padding: 10px 24px !important;
+      border-radius: 999px !important; 
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif !important;
+      font-size: 0.88rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 1.2px !important;
+      background: linear-gradient(90deg, rgba(0, 204, 255, 0.15), rgba(154, 107, 255, 0.2)) !important;
+      box-shadow: 0 0 16px rgba(0, 204, 255, 0.25) !important;
+      transition: all 0.3s ease-in-out !important;
+    }
+    .nav-cta::after {
+      display: none !important;
+    }
+    .nav-cta:hover {
+      background: linear-gradient(90deg, rgba(0, 204, 255, 0.25), rgba(154, 107, 255, 0.3)) !important;
+      color: #ffffff !important;
+      border-color: rgba(154, 107, 255, 0.8) !important;
+      box-shadow: 0 0 24px rgba(154, 107, 255, 0.35), 0 0 30px rgba(0, 204, 255, 0.25) !important;
+      transform: translateY(-2px);
+    }
+    .mobile-menu-btn {
+      display: none;
+      color: var(--neon-cyan);
+      font-size: 1.8rem;
+      cursor: pointer;
+    }
+    
+    /* Table Responsive Wrapper */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 760px) {
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: block; }
+    }
   </style>
 </head>
 <body>
+  <header id="navbar" class="header">
+    <div class="container header-content">
+      <div class="logo">OSIS</div>
+      <nav class="nav-links">
+        <a href="#about">About</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#predictor">Predictor</a>
+        <a href="#features" class="nav-cta">Features</a>
+      </nav>
+      <div class="mobile-menu-btn">☰</div>
+    </div>
+  </header>
   <canvas id="particle-canvas" aria-hidden="true"></canvas>
   <div class="overlay-glow" aria-hidden="true"></div>
 
@@ -837,13 +1059,132 @@
             </select>
           </div>
 
-          <button type="submit" class="submit-btn">Predict SNR</button>
+          <div class="predictor-section-title">Advanced Controls</div>
+
+          <div class="input-group">
+            <label for="modulation">BER Modulation Model</label>
+            <select id="modulation">
+              <option value="OOK-NRZ">OOK-NRZ</option>
+              <option value="BPSK">BPSK</option>
+              <option value="QPSK">QPSK</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="measured_snr">Measured SNR for Comparison (Optional, dB)</label>
+            <input type="number" id="measured_snr" step="0.01" placeholder="e.g. 58" />
+          </div>
+
+          <div class="input-group">
+            <label for="top_k">Optimization Top-K</label>
+            <input type="number" id="top_k" min="1" max="10" step="1" value="3" />
+          </div>
+
+          <div class="input-group">
+            <label for="delta_fraction">Sensitivity Delta Fraction</label>
+            <input type="number" id="delta_fraction" step="0.01" min="0.01" max="0.20" value="0.05" />
+          </div>
+
+          <div class="input-group">
+            <label for="sweep_param">Simulation Sweep Parameter</label>
+            <select id="sweep_param">
+              <option value="numerical_aperture">Numerical Aperture</option>
+              <option value="track_pitch_nm">Track Pitch</option>
+              <option value="temperature_c">Temperature</option>
+              <option value="relative_humidity">Humidity</option>
+              <option value="laser_wavelength_nm">Laser Wavelength</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="sim_start">Simulation Start</label>
+            <input type="number" id="sim_start" step="0.01" value="0.75" />
+          </div>
+
+          <div class="input-group">
+            <label for="sim_end">Simulation End</label>
+            <input type="number" id="sim_end" step="0.01" value="0.9" />
+          </div>
+
+          <div class="input-group">
+            <label for="sim_steps">Simulation Steps</label>
+            <input type="number" id="sim_steps" min="5" max="100" step="1" value="20" />
+          </div>
+
+          <button type="submit" class="submit-btn">Run Full Performance Analysis</button>
 
           <div id="result">
-            <h2>Predicted Signal-to-Noise Ratio</h2>
-            <div class="value" id="snrValue">-- dB</div>
-            <div class="chart-container">
-              <canvas id="snrChart"></canvas>
+            <h2>AI-Driven Optical Performance Results</h2>
+            <div class="result-grid">
+              <div class="metric-card">
+                <div class="metric-label">Physics SNR</div>
+                <div class="metric-value" id="physicsSnrValue">-- dB</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Hybrid SNR</div>
+                <div class="metric-value" id="hybridSnrValue">-- dB</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Estimated BER</div>
+                <div class="metric-value" id="berValue">--</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">SNR Gain (ML vs Physics)</div>
+                <div class="metric-value" id="gainValue">-- dB</div>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <h3>SNR Sensitivity Sweep</h3>
+              <div class="chart-container">
+                <canvas id="snrChart"></canvas>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <h3>Simulation Dashboard View</h3>
+              <div class="chart-container">
+                <canvas id="simulationChart"></canvas>
+              </div>
+              <div class="meta-line" id="simMeta"></div>
+            </div>
+
+            <div class="result-section">
+              <h3>Top Optimization Recommendations</h3>
+              <div class="table-responsive">
+                <table class="result-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>NA</th>
+                      <th>Track Pitch</th>
+                      <th>Temp</th>
+                      <th>Humidity</th>
+                      <th>SNR (dB)</th>
+                      <th>BER</th>
+                    </tr>
+                  </thead>
+                  <tbody id="optimizationBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <h3>Sensitivity Ranking</h3>
+              <div class="sensitivity-list" id="sensitivityBody"></div>
+            </div>
+
+            <div class="result-section" style="border-color: rgba(154, 107, 255, 0.4);">
+              <h3 style="color: #c4b5fd;">XAI: Local SHAP Explainability</h3>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 12px; text-align: left;">
+                Top 5 features driving this specific prediction away from the physics baseline.
+              </p>
+              <div class="sensitivity-list" id="shapBody"></div>
+            </div>
+
+            <div class="result-section">
+              <h3>Analytical vs ML Comparison</h3>
+              <div class="tiny" id="comparisonText">--</div>
             </div>
           </div>
         </form>
@@ -938,6 +1279,34 @@
   </footer>
 
   <script>
+    const header = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+    // Wait for lenis to be defined below, or simply use it natively if lenis is global
+    document.querySelectorAll('.nav-links a').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        
+        if (targetSection) {
+          const headerHeight = header.offsetHeight;
+          if (typeof lenis !== 'undefined') {
+            lenis.scrollTo(targetSection, { offset: -headerHeight });
+          } else {
+            const targetPosition = targetSection.getBoundingClientRect().top + window.scrollY - headerHeight;
+            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+          }
+        }
+      });
+    });
+
     const revealElements = document.querySelectorAll('.reveal');
     const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -1045,6 +1414,29 @@
     createParticles();
     drawParticles();
   </script>
+  
+  <!-- Lenis strictly for premium buttery smooth scrolling -->
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.35/dist/lenis.min.js"></script>
+  <script>
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      mouseMultiplier: 1,
+      smoothTouch: false,
+      touchMultiplier: 2,
+      infinite: false,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+  </script>
+  
   <script src="/static/app.js"></script>
 </body>
 </html>
