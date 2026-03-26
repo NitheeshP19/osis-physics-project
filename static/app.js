@@ -54,7 +54,8 @@ function buildPayload() {
 }
 
 async function postJson(url, payload) {
-    const response = await fetch(url, {
+    const baseUrl = (window.location.port === "5501") ? "http://127.0.0.1:8000" : "";
+    const response = await fetch(baseUrl + url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -201,7 +202,6 @@ function renderSensitivityList(items) {
 function updateMetricCards(snrData, berData, comparisonData) {
     document.getElementById("physicsSnrValue").textContent = `${Number(snrData.physics_snr_db).toFixed(3)} dB`;
     
-    // Add UQ Confidence Intervals
     const hybridHtml = `
       ${Number(snrData.predicted_snr_db).toFixed(3)} dB
       <div style="font-size: 0.8rem; color: #9a6bff; margin-top: 4px;">
@@ -222,7 +222,6 @@ function renderShap(shapData) {
         const div = document.createElement("div");
         div.className = "sensitivity-item";
         
-        // Color code positive vs negative impact
         const impactColor = item.impact > 0 ? '#34d399' : '#f43f5e';
         const sign = item.impact > 0 ? '+' : '';
         
@@ -245,7 +244,40 @@ function renderComparisonText(cmpData) {
 }
 
 const triggerInputs = ["wavelength", "na", "track_pitch", "layer_spacing"];
-triggerInputs.forEach(id => document.getElementById(id).addEventListener("input", calculatePhysics));
+triggerInputs.forEach(id => {
+    document.getElementById(id).addEventListener("input", () => {
+        const formatSelect = document.getElementById("disc_format");
+        if (formatSelect) formatSelect.value = "custom";
+        calculatePhysics();
+    });
+});
+
+const formatEl = document.getElementById("disc_format");
+if (formatEl) {
+    formatEl.addEventListener("change", (e) => {
+        const format = e.target.value;
+        if (format === "cd") {
+            document.getElementById("wavelength").value = "780";
+            document.getElementById("na").value = "0.45";
+            document.getElementById("track_pitch").value = "1600";
+            document.getElementById("layer_spacing").value = "0";
+            document.getElementById("layer_count").value = "1";
+        } else if (format === "dvd") {
+            document.getElementById("wavelength").value = "650";
+            document.getElementById("na").value = "0.60";
+            document.getElementById("track_pitch").value = "740";
+            document.getElementById("layer_spacing").value = "55000";
+            document.getElementById("layer_count").value = "2";
+        } else if (format === "bd") {
+            document.getElementById("wavelength").value = "405";
+            document.getElementById("na").value = "0.85";
+            document.getElementById("track_pitch").value = "320";
+            document.getElementById("layer_spacing").value = "25000";
+            document.getElementById("layer_count").value = "2";
+        }
+        calculatePhysics();
+    });
+}
 document.getElementById("sweep_param").addEventListener("change", applySweepDefaults);
 
 calculatePhysics();
@@ -296,11 +328,14 @@ document.getElementById("osisForm").addEventListener("submit", async (e) => {
         renderSensitivityList(sensData.ranked_sensitivity || []);
         renderShap(snrData.shap_explanations || []);
         renderComparisonText(cmpData);
-        renderSensitivitySweep(simData.frames || []);
-        renderSimulationChart(simData.frames || [], sweepParameter);
+        const frames = (simData && simData.frames) ? simData.frames : [];
+        renderSensitivitySweep(frames);
+        renderSimulationChart(frames, sweepParameter);
 
         const simMeta = document.getElementById("simMeta");
-        simMeta.textContent = `${simData.frames.length} frames generated for ${sweepParameter} sweep from ${simStart} to ${simEnd}.`;
+        if (simMeta) {
+            simMeta.textContent = `${frames.length} frames generated for ${sweepParameter} sweep from ${simStart} to ${simEnd}.`;
+        }
 
         const resultDiv = document.getElementById("result");
         resultDiv.style.display = "block";
@@ -314,6 +349,200 @@ document.getElementById("osisForm").addEventListener("submit", async (e) => {
         alert("Analysis failed. Ensure backend is running and inputs are valid.");
     } finally {
         btn.textContent = originalText;
+        btn.disabled = false;
+    }
+});
+
+// ================================================================
+// PLATFORM SIMULATION DASHBOARD
+// Matches backend: POST /api/v1/simulate_platform
+// Backend returns: pipelineMetrics + visualizations
+//   pipelineMetrics keys: snrDb, berPostFec, maxSpotTempK, factoryYieldPct,
+//     manufacturingMode, snrCenter, snrEdge, snrMean, snrStd,
+//     yieldConfidence, reflectivityMean, reflectivityStd
+//   visualizations keys: eyeDiagramData, reflectivitySpectrum,
+//     thermalProfile, manufacturingProcess
+//   manufacturingProcess keys: radiusMm, birefringenceNm,
+//     thicknessVariancePct, variance_profile, reflectivity_profile,
+//     reflectivity_mean, reflectivity_std, snr_center, snr_edge, etc.
+// ================================================================
+document.getElementById('runPlatformSimBtn')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const btn = e.target;
+    const oldText = btn.textContent;
+    btn.textContent = "Processing matrices...";
+    btn.disabled = true;
+
+    try {
+        // Build the payload matching AdvancedSimInput schema exactly
+        const payload = {
+            simulationMode: document.getElementById('simulation_mode')?.value || 'fast',
+            opticalConfig: {
+                wavelengthNm: parseFloat(document.getElementById('wavelength').value) || 405,
+                numericalAperture: parseFloat(document.getElementById('na').value) || 0.85,
+                laserPowerWriteMw: 8.0
+            },
+            stackConfig: [
+                {layerName: "Dielectric 1", thicknessNm: 100, material: "ZnS-SiO2", refractiveIndexN: 2.1},
+                {layerName: "Active Phase", thicknessNm: 15, material: "GST", refractiveIndexN: 4.1, extinctionCoefficientK: 2.1},
+                {layerName: "Dielectric 2", thicknessNm: 20, material: "ZnS-SiO2", refractiveIndexN: 2.1},
+                {layerName: "Reflective", thicknessNm: 120, material: "Ag", refractiveIndexN: 0.05, extinctionCoefficientK: 4.0}
+            ],
+            thermalConfig: {
+                ambientTempK: parseFloat(document.getElementById('temp')?.value || 25) + 273.15,
+                thermalDiffCoeff: 1.5e-7
+            },
+            manufacturingConfig: {
+                moldingTempC: parseFloat(document.getElementById('molding_temp')?.value || 350),
+                moldPressureTons: parseFloat(document.getElementById('mold_pressure')?.value || 50),
+                coolingTimeS: parseFloat(document.getElementById('cooling_time')?.value || 2.5),
+                sputteringRateNmS: parseFloat(document.getElementById('sputtering_rate')?.value || 5.0),
+                baseThicknessNm: parseFloat(document.getElementById('base_thickness')?.value || 15.0),
+                refractiveIndexN2: parseFloat(document.getElementById('refractive_index')?.value || 4.1),
+                thicknessVariationScale: parseFloat(document.getElementById('variation_scale')?.value || 0.05)
+            }
+        };
+
+        const baseUrl = (window.location.port === "5501") ? "http://127.0.0.1:8000" : "";
+        const res = await fetch(baseUrl + '/api/v1/simulate_platform', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) {
+            const errText = await res.text();
+            throw new Error("Simulation pipeline error: " + errText);
+        }
+        const data = await res.json();
+        const metrics = data.pipelineMetrics;
+
+        // ---- Update Metric Cards ----
+        const el = (id) => document.getElementById(id);
+
+        if (el('simMaxTemp')) el('simMaxTemp').textContent = metrics.maxSpotTempK + " K";
+        if (el('simBer')) el('simBer').textContent = Number(metrics.berPostFec).toExponential(3);
+        if (el('simYield')) el('simYield').textContent = metrics.factoryYieldPct + " %";
+
+        if (el('simSnrMCarlo')) {
+            el('simSnrMCarlo').textContent = metrics.manufacturingMode
+                ? `${metrics.snrMean.toFixed(2)} \u00b1 ${metrics.snrStd.toFixed(2)} dB`
+                : `${metrics.snrMean.toFixed(2)} dB (Fast)`;
+        }
+
+        if (el('simSnrRadial')) {
+            el('simSnrRadial').textContent = `${metrics.snrCenter.toFixed(2)} / ${metrics.snrEdge.toFixed(2)} dB`;
+        }
+
+        if (el('simReflectMCarlo')) {
+            el('simReflectMCarlo').textContent = metrics.manufacturingMode
+                ? `${(metrics.reflectivityMean * 100).toFixed(2)} \u00b1 ${(metrics.reflectivityStd * 100).toFixed(2)} %`
+                : `${(metrics.reflectivityMean * 100).toFixed(2)} % (Fast)`;
+        }
+
+        el('simResults').style.display = 'block';
+
+        // ---- Plotly Layout Base ----
+        const layoutBase = {
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            margin: {l: 50, r: 50, t: 20, b: 40},
+            font: {color: '#b8c5ef'},
+            xaxis: {gridcolor: 'rgba(255,255,255,0.06)'},
+            yaxis: {gridcolor: 'rgba(255,255,255,0.06)'}
+        };
+        const plotCfg = {responsive: true, displayModeBar: false};
+
+        // ---- 1. Eye Diagram ----
+        const eyeData = data.visualizations.eyeDiagramData;
+        const eyeTraces = eyeData.voltageTraces.map(trace => ({
+            x: eyeData.timeBaseUI, y: trace, mode: 'lines',
+            line: {color: 'rgba(52, 245, 255, 0.2)', width: 1}, hoverinfo: 'none'
+        }));
+        Plotly.newPlot('plotlyEye', eyeTraces, {
+            ...layoutBase, showlegend: false,
+            xaxis: {...layoutBase.xaxis, title: 'Time (UI)'},
+            yaxis: {...layoutBase.yaxis, title: 'Voltage (V)'}
+        }, plotCfg);
+
+        // ---- 2. Reflectivity Spectrum (TMM from optics.py) ----
+        const refData = data.visualizations.reflectivitySpectrum;
+        Plotly.newPlot('plotlyReflect', [{
+            x: refData.wavelengths, y: refData.reflectivityPercentage,
+            mode: 'lines', line: {color: '#9a6bff', width: 2},
+            fill: 'tozeroy', fillcolor: 'rgba(154, 107, 255, 0.08)'
+        }], {
+            ...layoutBase,
+            xaxis: {...layoutBase.xaxis, title: 'Wavelength (nm)'},
+            yaxis: {...layoutBase.yaxis, title: 'Reflectivity (%)'}
+        }, plotCfg);
+
+        // ---- 3. Radial Reflectivity Profile (from manufacturing.py Monte Carlo) ----
+        const mfgData = data.visualizations.manufacturingProcess;
+        if (mfgData && mfgData.reflectivity_profile && el('plotlyReflectivityProfile')) {
+            Plotly.newPlot('plotlyReflectivityProfile', [{
+                x: mfgData.radiusMm,
+                y: mfgData.reflectivity_profile.map(v => v * 100),
+                name: 'Reflectivity (%)',
+                type: 'scatter', mode: 'lines',
+                line: {color: '#9a6bff', width: 2},
+                fill: 'tozeroy', fillcolor: 'rgba(154, 107, 255, 0.1)'
+            }], {
+                ...layoutBase, showlegend: false,
+                xaxis: {...layoutBase.xaxis, title: 'Disc Radius (mm)'},
+                yaxis: {...layoutBase.yaxis, title: 'Reflectivity (%)'}
+            }, plotCfg);
+        }
+
+        // ---- 4. Thermal Profile ----
+        const thData = data.visualizations.thermalProfile;
+        Plotly.newPlot('plotlyThermal', [
+            { x: thData.timeNs, y: thData.centerTempK, name: 'Center Temp', line: {color: '#f43f5e', width: 2} },
+            { x: thData.timeNs, y: thData.edgeTempK, name: 'Edge Temp', line: {color: '#fbbf24', width: 2} }
+        ], {
+            ...layoutBase, showlegend: true,
+            xaxis: {...layoutBase.xaxis, title: 'Time (ns)'},
+            yaxis: {...layoutBase.yaxis, title: 'Temperature (K)'}
+        }, plotCfg);
+
+        // ---- 5. Manufacturing Quality (Birefringence + Thickness + SNR Profile) ----
+        if (mfgData && el('plotlyManufacturing')) {
+            const mfgTraces = [
+                {
+                    x: mfgData.radiusMm, y: mfgData.birefringenceNm,
+                    name: 'Warp/Birefringence (nm)', yaxis: 'y1',
+                    type: 'scatter', line: {color: '#fbbf24', width: 2}
+                },
+                {
+                    x: mfgData.radiusMm, y: mfgData.thicknessVariancePct,
+                    name: 'Thickness Var (%)', yaxis: 'y2',
+                    type: 'scatter', line: {color: '#34f5ff', width: 2, dash: 'dot'}
+                }
+            ];
+            if (mfgData.variance_profile) {
+                mfgTraces.push({
+                    x: mfgData.radiusMm, y: mfgData.variance_profile,
+                    name: 'SNR Profile (dB)', yaxis: 'y1',
+                    type: 'scatter', line: {color: '#f43f5e', width: 2, dash: 'dash'}
+                });
+            }
+            Plotly.newPlot('plotlyManufacturing', mfgTraces, {
+                ...layoutBase, showlegend: true,
+                xaxis: {...layoutBase.xaxis, title: 'Disc Radius (mm)'},
+                yaxis: {...layoutBase.yaxis, title: 'Birefringence / SNR'},
+                yaxis2: {
+                    title: 'Thickness Var (%)', overlaying: 'y', side: 'right',
+                    gridcolor: 'rgba(255,255,255,0.02)',
+                    tickfont: {color: '#34f5ff'}
+                }
+            }, plotCfg);
+        }
+
+    } catch(err) {
+        console.error(err);
+        alert(err.message);
+    } finally {
+        btn.textContent = oldText;
         btn.disabled = false;
     }
 });

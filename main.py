@@ -7,6 +7,12 @@ import numpy as np
 import joblib
 import math
 from typing import Any, Dict, List, Optional
+from fastapi.middleware.cors import CORSMiddleware
+from app.ml.model_loader import registry
+from app.api.routes import router as api_router
+
+# Load registry models globally so prediction functions in app/ml/predictor.py work
+registry.load_models(".")
 
 # Load trained models, Quantiles, and Explainer
 model = joblib.load("osis_snr_model.pkl")
@@ -16,6 +22,14 @@ feature_columns = joblib.load("osis_features.pkl")
 explainer = joblib.load("osis_explainer.pkl")
 
 app = FastAPI(title="OSIS Hybrid SNR Predictor")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5501", "http://localhost:5501"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -498,4 +512,6 @@ def simulate_dashboard(data: SimulationInput):
         "sweep_parameter": sweep_parameter,
         "frames": timeline
     }
+
+app.include_router(api_router)
 

@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Orbitron:wght@500;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
   <style>
     :root {
       --bg-1: #070a1a;
@@ -824,6 +825,7 @@
         <a href="#about">About</a>
         <a href="#workflow">Workflow</a>
         <a href="#predictor">Predictor</a>
+        <a href="#simulation-platform">Simulation</a>
         <a href="#features" class="nav-cta">Features</a>
       </nav>
       <div class="mobile-menu-btn">☰</div>
@@ -965,6 +967,16 @@
           <div class="predictor-section-title">Optical Parameters</div>
 
           <div class="input-group">
+            <label for="disc_format">Disc Format Preset</label>
+            <select id="disc_format">
+              <option value="custom">Custom / Manual</option>
+              <option value="cd">CD</option>
+              <option value="dvd">DVD</option>
+              <option value="bd" selected>Blu-ray Disc (BD)</option>
+            </select>
+          </div>
+
+          <div class="input-group">
             <label for="wavelength">Laser Wavelength (nm)</label>
             <input type="number" id="wavelength" step="1" value="405" required />
           </div>
@@ -1059,7 +1071,46 @@
             </select>
           </div>
 
+          <div class="predictor-section-title">Manufacturing Process</div>
+
+          <div class="input-group">
+            <label for="molding_temp">Molding Temp (°C)</label>
+            <input type="number" id="molding_temp" step="1" value="350" />
+          </div>
+          <div class="input-group">
+            <label for="mold_pressure">Mold Pressure (Tons)</label>
+            <input type="number" id="mold_pressure" step="1" value="50" />
+          </div>
+          <div class="input-group">
+            <label for="cooling_time">Cooling Time (s)</label>
+            <input type="number" id="cooling_time" step="0.1" value="2.5" />
+          </div>
+          <div class="input-group">
+            <label for="sputtering_rate">Sputtering Rate (nm/s)</label>
+            <input type="number" id="sputtering_rate" step="0.1" value="5.0" />
+          </div>
+          <div class="input-group">
+            <label for="base_thickness">Base Thickness (nm)</label>
+            <input type="number" id="base_thickness" step="0.1" value="15.0" />
+          </div>
+          <div class="input-group">
+            <label for="refractive_index">Refractive Index (n)</label>
+            <input type="number" id="refractive_index" step="0.1" value="4.1" />
+          </div>
+          <div class="input-group">
+            <label for="variation_scale">Thickness Variation Scale</label>
+            <input type="number" id="variation_scale" step="0.01" value="0.05" />
+          </div>
+
           <div class="predictor-section-title">Advanced Controls</div>
+
+          <div class="input-group">
+            <label for="simulation_mode">Simulation Engine</label>
+            <select id="simulation_mode">
+              <option value="fast">Fast (Deterministic)</option>
+              <option value="manufacturing">Manufacturing (100x Monte Carlo)</option>
+            </select>
+          </div>
 
           <div class="input-group">
             <label for="modulation">BER Modulation Model</label>
@@ -1188,6 +1239,68 @@
             </div>
           </div>
         </form>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <section id="simulation-platform" class="reveal">
+    <div class="container">
+      <h2 class="section-title">Industry Platform Simulation</h2>
+      <p class="section-subtitle">Simulate physical, thermal, and optical behaviors across engineered layers using advanced NumPy approximations.</p>
+      <div class="predictor-panel glass">
+         <button id="runPlatformSimBtn" type="button" class="submit-btn" style="width:100%; margin-bottom: 20px;">Run Complete Vectorized Simulation</button>
+         
+         <div id="simResults" style="display:none; animation: fadeIn 0.3s ease-out;">
+            <div class="result-grid" style="margin-bottom: 20px;">
+              <div class="metric-card">
+                <div class="metric-label">Max Spot Temp</div>
+                <div class="metric-value" id="simMaxTemp">-- K</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Post-FEC BER</div>
+                <div class="metric-value" id="simBer">--</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Factory Yield</div>
+                <div class="metric-value" id="simYield">-- %</div>
+              </div>
+              <div class="metric-card" style="border-color: rgba(52, 245, 255, 0.4);">
+                <div class="metric-label" style="color: #34f5ff;">Monte Carlo SNR (Mean ± Std)</div>
+                <div class="metric-value" id="simSnrMCarlo">-- dB</div>
+              </div>
+              <div class="metric-card" style="border-color: rgba(52, 245, 255, 0.4);">
+                <div class="metric-label" style="color: #34f5ff;">SNR (Center vs Edge)</div>
+                <div class="metric-value" id="simSnrRadial">-- / -- dB</div>
+              </div>
+              <div class="metric-card" style="border-color: rgba(154, 107, 255, 0.4);">
+                <div class="metric-label" style="color: #9a6bff;">MC Reflectivity (Mean ± Std)</div>
+                <div class="metric-value" id="simReflectMCarlo">-- %</div>
+              </div>
+            </div>
+
+            <div class="result-section">
+                <h3>Eye Diagram Synthesis</h3>
+                <div id="plotlyEye" style="width:100%; height:320px;"></div>
+            </div>
+            <div class="result-section">
+                <h3>Reflectivity Spectrum (TMM)</h3>
+                <div id="plotlyReflect" style="width:100%; height:320px;"></div>
+            </div>
+            <div class="result-section" style="border-color: rgba(154, 107, 255, 0.3);">
+                <h3 style="color:#9a6bff;">Radial Reflectivity Variation</h3>
+                <div id="plotlyReflectivityProfile" style="width:100%; height:320px;"></div>
+            </div>
+            <div class="result-section">
+                <h3>Write Pulse Thermal Diffusion</h3>
+                <div id="plotlyThermal" style="width:100%; height:320px;"></div>
+            </div>
+            <div class="result-section" style="border-color: rgba(251, 191, 36, 0.3);">
+                <h3 style="color:#fbbf24;">Manufacturing Quality (Birefringence & Thickness)</h3>
+                <div id="plotlyManufacturing" style="width:100%; height:320px;"></div>
+            </div>
+         </div>
       </div>
     </div>
   </section>

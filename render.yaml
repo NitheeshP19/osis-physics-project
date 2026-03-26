@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: osis-hybrid-simulation
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --timeout 120 --preload
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12
