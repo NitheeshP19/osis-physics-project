@@ -2,8 +2,18 @@
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 
-from app.utils.validation import OSISInput, BERInput, ComparisonInput, OptimizationInput, SensitivityInput, SimulationInput, AdvancedSimInput
+from app.utils.validation import (
+    OSISInput,
+    BERInput,
+    ComparisonInput,
+    OptimizationInput,
+    SensitivityInput,
+    SimulationInput,
+    AdvancedSimInput,
+    BatchSimulationRequest,
+)
 from app.ml.predictor import predict_snr_ber, safe_feature_pipeline, estimate_ber_from_snr
+from app.services.batch_simulation import run_batch_simulation
 from app.physics.optics import approximate_reflectivity_spectrum
 from app.physics.thermal import approximate_thermal_pulse
 from app.physics.signal import synthesize_eye_diagram
@@ -12,6 +22,14 @@ import numpy as np
 import math
 
 router = APIRouter()
+
+
+@router.post("/api/v1/batch_simulations")
+async def batch_simulations(data: BatchSimulationRequest):
+    try:
+        return await run_batch_simulation(data.batchConfigs, default_modulation=data.modulation)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Batch simulation error: {str(e)}")
 
 # ================================
 # NEW PRODUCTION SIMULATION API

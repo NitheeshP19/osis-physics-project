@@ -1,3 +1,55 @@
+const BASE_URL = (window.location.port === "5501") ? "http://127.0.0.1:8000" : "";
+
+const batchState = {
+    enabled: false,
+    targetCount: 4,
+    batchConfigs: [],
+    rankedResults: [],
+    running: false,
+    helperMessage: ""
+};
+
+function getEl(id) {
+    return document.getElementById(id);
+}
+
+function formatFixed(value, digits = 3, suffix = "") {
+    const num = Number(value);
+    if (!Number.isFinite(num)) return "--";
+    return `${num.toFixed(digits)}${suffix}`;
+}
+
+function formatExponential(value, digits = 3) {
+    const num = Number(value);
+    if (!Number.isFinite(num)) return "--";
+    return num.toExponential(digits);
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function scrollToElement(element) {
+    if (!element) return;
+
+    if (typeof lenis !== "undefined") {
+        lenis.scrollTo(element, { offset: -100 });
+    } else {
+        element.scrollIntoView({ behavior: "smooth" });
+    }
+}
+
+function calculateOptimizationScore(hybridSnrDb, postFecBer) {
+    const snr = Number(hybridSnrDb) || 0;
+    const boundedBer = Math.max(Number(postFecBer) || 0, 1e-15);
+    return snr - (10 * Math.log10(boundedBer));
+}
+
 function calculatePhysics() {
     const wl = parseFloat(document.getElementById("wavelength").value);
     const na = parseFloat(document.getElementById("na").value);
@@ -54,8 +106,7 @@ function buildPayload() {
 }
 
 async function postJson(url, payload) {
-    const baseUrl = (window.location.port === "5501") ? "http://127.0.0.1:8000" : "";
-    const response = await fetch(baseUrl + url, {
+    const response = await fetch(BASE_URL + url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -72,11 +123,19 @@ let snrChart = null;
 let simulationChart = null;
 
 function renderSensitivitySweep(simFrames) {
+    const chartEl = getEl("snrChart");
+    if (!chartEl) return;
+
+    if (snrChart) {
+        snrChart.destroy();
+        snrChart = null;
+    }
+
+    if (!Array.isArray(simFrames) || simFrames.length === 0) return;
+
     const labels = simFrames.map(f => Number(f.value).toFixed(3));
     const snrValues = simFrames.map(f => Number(f.predicted_snr_db).toFixed(3));
-    const ctx = document.getElementById("snrChart").getContext("2d");
-
-    if (snrChart) snrChart.destroy();
+    const ctx = chartEl.getContext("2d");
 
     snrChart = new Chart(ctx, {
         type: "line",
@@ -104,12 +163,20 @@ function renderSensitivitySweep(simFrames) {
 }
 
 function renderSimulationChart(simFrames, param) {
+    const chartEl = getEl("simulationChart");
+    if (!chartEl) return;
+
+    if (simulationChart) {
+        simulationChart.destroy();
+        simulationChart = null;
+    }
+
+    if (!Array.isArray(simFrames) || simFrames.length === 0) return;
+
     const labels = simFrames.map(f => Number(f.value).toFixed(3));
     const snr = simFrames.map(f => f.predicted_snr_db);
     const ber = simFrames.map(f => f.estimated_ber);
-    const ctx = document.getElementById("simulationChart").getContext("2d");
-
-    if (simulationChart) simulationChart.destroy();
+    const ctx = chartEl.getContext("2d");
 
     simulationChart = new Chart(ctx, {
         type: "line",
@@ -168,54 +235,59 @@ function renderSimulationChart(simFrames, param) {
 }
 
 function renderOptimizationTable(rows) {
-    const body = document.getElementById("optimizationBody");
+    const body = getEl("optimizationBody");
     body.innerHTML = "";
     rows.forEach((row, idx) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${idx + 1}</td>
-            <td>${Number(row.numerical_aperture).toFixed(3)}</td>
-            <td>${Number(row.track_pitch_nm).toFixed(2)}</td>
-            <td>${Number(row.temperature_c).toFixed(1)}</td>
-            <td>${Number(row.relative_humidity).toFixed(1)}</td>
-            <td>${Number(row.predicted_snr_db).toFixed(3)}</td>
-            <td>${Number(row.estimated_ber).toExponential(3)}</td>
+            <td>${formatFixed(row.numerical_aperture, 3)}</td>
+            <td>${formatFixed(row.track_pitch_nm, 2)}</td>
+            <td>${formatFixed(row.temperature_c, 1)}</td>
+            <td>${formatFixed(row.relative_humidity, 1)}</td>
+            <td>${formatFixed(row.predicted_snr_db, 3)}</td>
+            <td>${formatExponential(row.estimated_ber, 3)}</td>
         `;
         body.appendChild(tr);
     });
 }
 
 function renderSensitivityList(items) {
-    const container = document.getElementById("sensitivityBody");
+    const container = getEl("sensitivityBody");
     container.innerHTML = "";
     items.slice(0, 7).forEach(item => {
         const div = document.createElement("div");
         div.className = "sensitivity-item";
         div.innerHTML = `
-            <span>${item.parameter}</span>
-            <span>${Number(item.normalized_sensitivity).toFixed(4)}</span>
+            <span>${escapeHtml(item.parameter)}</span>
+            <span>${formatFixed(item.normalized_sensitivity, 4)}</span>
         `;
         container.appendChild(div);
     });
 }
 
 function updateMetricCards(snrData, berData, comparisonData) {
-    document.getElementById("physicsSnrValue").textContent = `${Number(snrData.physics_snr_db).toFixed(3)} dB`;
-    
-    const hybridHtml = `
-      ${Number(snrData.predicted_snr_db).toFixed(3)} dB
-      <div style="font-size: 0.8rem; color: #9a6bff; margin-top: 4px;">
-        90% CI: [${Number(snrData.snr_lower_bound_db).toFixed(2)}, ${Number(snrData.snr_upper_bound_db).toFixed(2)}]
-      </div>
-    `;
-    document.getElementById("hybridSnrValue").innerHTML = hybridHtml;
-    
-    document.getElementById("berValue").textContent = Number(berData.estimated_ber).toExponential(3);
-    document.getElementById("gainValue").textContent = `${Number(comparisonData.snr_gain_over_analytical_db).toFixed(3)} dB`;
+    getEl("physicsSnrValue").textContent = `${formatFixed(snrData.physics_snr_db, 3)} dB`;
+
+    const lower = Number(snrData.snr_lower_bound_db);
+    const upper = Number(snrData.snr_upper_bound_db);
+    if (Number.isFinite(lower) && Number.isFinite(upper)) {
+        getEl("hybridSnrValue").innerHTML = `
+          ${formatFixed(snrData.predicted_snr_db, 3)} dB
+          <div style="font-size: 0.8rem; color: #9a6bff; margin-top: 4px;">
+            90% CI: [${lower.toFixed(2)}, ${upper.toFixed(2)}]
+          </div>
+        `;
+    } else {
+        getEl("hybridSnrValue").textContent = `${formatFixed(snrData.predicted_snr_db, 3)} dB`;
+    }
+
+    getEl("berValue").textContent = formatExponential(berData.estimated_ber, 3);
+    getEl("gainValue").textContent = `${formatFixed(comparisonData.snr_gain_over_analytical_db, 3)} dB`;
 }
 
 function renderShap(shapData) {
-    const container = document.getElementById("shapBody");
+    const container = getEl("shapBody");
     if(!container) return;
     container.innerHTML = "";
     shapData.forEach(item => {
@@ -226,8 +298,8 @@ function renderShap(shapData) {
         const sign = item.impact > 0 ? '+' : '';
         
         div.innerHTML = `
-            <span>${item.feature}</span>
-            <span style="color: ${impactColor}; font-weight: 600;">${sign}${Number(item.impact).toFixed(4)} dB</span>
+            <span>${escapeHtml(item.feature)}</span>
+            <span style="color: ${impactColor}; font-weight: 600;">${sign}${formatFixed(item.impact, 4)} dB</span>
         `;
         container.appendChild(div);
     });
@@ -236,71 +308,481 @@ function renderShap(shapData) {
 function renderComparisonText(cmpData) {
     const hasMeasured = cmpData.measured_snr_db !== undefined;
     const measuredLine = hasMeasured
-        ? `Measured SNR: ${Number(cmpData.measured_snr_db).toFixed(3)} dB | Analytical Error: ${Number(cmpData.abs_error_analytical_db).toFixed(3)} dB | Hybrid Error: ${Number(cmpData.abs_error_ml_hybrid_db).toFixed(3)} dB`
+        ? `Measured SNR: ${formatFixed(cmpData.measured_snr_db, 3)} dB | Analytical Error: ${formatFixed(cmpData.abs_error_analytical_db, 3)} dB | Hybrid Error: ${formatFixed(cmpData.abs_error_ml_hybrid_db, 3)} dB`
         : "Measured SNR not provided.";
 
-    document.getElementById("comparisonText").textContent =
-        `Analytical SNR: ${Number(cmpData.analytical_physics_snr_db).toFixed(3)} dB | Hybrid SNR: ${Number(cmpData.ml_hybrid_snr_db).toFixed(3)} dB | BER Reduction Ratio: ${Number(cmpData.ber_reduction_ratio).toFixed(3)} | ${measuredLine}`;
+    getEl("comparisonText").textContent =
+        `Analytical SNR: ${formatFixed(cmpData.analytical_physics_snr_db, 3)} dB | Hybrid SNR: ${formatFixed(cmpData.ml_hybrid_snr_db, 3)} dB | BER Reduction Ratio: ${formatFixed(cmpData.ber_reduction_ratio, 3)} | ${measuredLine}`;
 }
 
-const triggerInputs = ["wavelength", "na", "track_pitch", "layer_spacing"];
-triggerInputs.forEach(id => {
-    document.getElementById(id).addEventListener("input", () => {
-        const formatSelect = document.getElementById("disc_format");
-        if (formatSelect) formatSelect.value = "custom";
-        calculatePhysics();
-    });
-});
+function getPrimarySubmitButton() {
+    return document.querySelector("#osisForm .submit-btn");
+}
 
-const formatEl = document.getElementById("disc_format");
-if (formatEl) {
-    formatEl.addEventListener("change", (e) => {
-        const format = e.target.value;
-        if (format === "cd") {
-            document.getElementById("wavelength").value = "780";
-            document.getElementById("na").value = "0.45";
-            document.getElementById("track_pitch").value = "1600";
-            document.getElementById("layer_spacing").value = "0";
-            document.getElementById("layer_count").value = "1";
-        } else if (format === "dvd") {
-            document.getElementById("wavelength").value = "650";
-            document.getElementById("na").value = "0.60";
-            document.getElementById("track_pitch").value = "740";
-            document.getElementById("layer_spacing").value = "55000";
-            document.getElementById("layer_count").value = "2";
-        } else if (format === "bd") {
-            document.getElementById("wavelength").value = "405";
-            document.getElementById("na").value = "0.85";
-            document.getElementById("track_pitch").value = "320";
-            document.getElementById("layer_spacing").value = "25000";
-            document.getElementById("layer_count").value = "2";
+function clampBatchCount(value) {
+    const numeric = parseInt(value, 10);
+    if (!Number.isFinite(numeric)) return 4;
+    return Math.min(12, Math.max(2, numeric));
+}
+
+function generateBatchClientId() {
+    return `osis-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function buildBatchSnapshot() {
+    const config = buildPayload();
+    const batchIndex = batchState.batchConfigs.length + 1;
+
+    return {
+        clientId: generateBatchClientId(),
+        label: `Simulation ${batchIndex}`,
+        modulation: getEl("modulation").value,
+        config,
+        reportInputs: {
+            laser_wavelength_nm: config.laser_wavelength_nm,
+            numerical_aperture: config.numerical_aperture,
+            track_pitch_nm: config.track_pitch_nm,
+            temperature_c: config.temperature_c,
+            relative_humidity: config.relative_humidity,
+            recording_material: config.recording_material,
+            sputtering_rate_nm_s: parseFloat(getEl("sputtering_rate").value),
+            base_thickness_nm: parseFloat(getEl("base_thickness").value),
+            simulation_mode: getEl("simulation_mode").value
         }
-        calculatePhysics();
+    };
+}
+
+function clearBatchResults() {
+    batchState.rankedResults = [];
+    getEl("batchResult").style.display = "none";
+    getEl("batchResultSummary").textContent = "Ranked batch simulations will appear here after the final configuration is submitted.";
+    getEl("batchSizeValue").textContent = "--";
+    getEl("batchBestSnrValue").textContent = "-- dB";
+    getEl("batchLowestBerValue").textContent = "--";
+    getEl("batchSpreadValue").textContent = "--";
+    getEl("batchWinnerPanel").innerHTML = "";
+    getEl("batchRankingList").innerHTML = "";
+    getEl("batchSummaryBody").innerHTML = "";
+    getEl("downloadBatchPdfBtn").disabled = true;
+}
+
+function renderBatchQueue() {
+    const container = getEl("batchConfigList");
+    container.innerHTML = "";
+
+    if (!batchState.enabled) {
+        container.innerHTML = `
+            <div class="batch-chip">
+                <strong>Single-run ready</strong>
+                <small>The current prediction pipeline stays untouched until batch mode is enabled.</small>
+            </div>
+        `;
+        return;
+    }
+
+    if (!batchState.batchConfigs.length) {
+        container.innerHTML = `
+            <div class="batch-chip">
+                <strong>No saved configurations yet</strong>
+                <small>Submit the form to store Simulation 1 in the temporary batchConfigs queue.</small>
+            </div>
+        `;
+        return;
+    }
+
+    batchState.batchConfigs.forEach((snapshot) => {
+        const chip = document.createElement("div");
+        chip.className = "batch-chip";
+        chip.innerHTML = `
+            <strong>${escapeHtml(snapshot.label)}</strong>
+            <small>NA ${formatFixed(snapshot.reportInputs.numerical_aperture, 3)} | Temp ${formatFixed(snapshot.reportInputs.temperature_c, 1)} C | Sputter ${formatFixed(snapshot.reportInputs.sputtering_rate_nm_s, 1)} nm/s</small>
+        `;
+        container.appendChild(chip);
     });
 }
-document.getElementById("sweep_param").addEventListener("change", applySweepDefaults);
 
-calculatePhysics();
-applySweepDefaults();
+function updateSubmitButtonLabel() {
+    const button = getPrimarySubmitButton();
+    if (!button) return;
 
-document.getElementById("osisForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+    if (!button.dataset.singleLabel) {
+        button.dataset.singleLabel = button.textContent.trim();
+    }
 
-    const btn = document.querySelector(".submit-btn");
-    const originalText = btn.textContent;
+    if (batchState.running) return;
+
+    if (!batchState.enabled) {
+        button.textContent = button.dataset.singleLabel;
+        return;
+    }
+
+    const nextStep = Math.min(batchState.batchConfigs.length + 1, batchState.targetCount);
+    const isFinalCapture = batchState.batchConfigs.length === batchState.targetCount - 1;
+    button.textContent = isFinalCapture
+        ? `Save Configuration ${nextStep} of ${batchState.targetCount} and Run Batch Ranking`
+        : `Save Configuration ${nextStep} of ${batchState.targetCount}`;
+}
+
+function updateBatchUi() {
+    batchState.targetCount = clampBatchCount(getEl("batch_count").value);
+    getEl("batch_count").value = String(batchState.targetCount);
+
+    const titleEl = getEl("batchWizardTitle");
+    const textEl = getEl("batchWizardText");
+    const badgeEl = getEl("batchStepBadge");
+    const progressEl = getEl("batchProgressBar");
+    const noteEl = getEl("batchInlineNote");
+    const resetBtn = getEl("resetBatchBtn");
+
+    if (!batchState.enabled) {
+        titleEl.textContent = "Single-run mode is active";
+        textEl.textContent = "Enable batch mode to queue multiple OSIS configurations before the ML model and ranking engine start.";
+        badgeEl.textContent = "1 / 1";
+        progressEl.style.width = "0%";
+        noteEl.textContent = "Batch ranking uses Hybrid SNR and Post-FEC BER after all configurations are collected.";
+        resetBtn.disabled = true;
+        renderBatchQueue();
+        updateSubmitButtonLabel();
+        return;
+    }
+
+    const capturedCount = batchState.batchConfigs.length;
+    const nextStep = Math.min(capturedCount + 1, batchState.targetCount);
+    const progressPct = Math.min((capturedCount / batchState.targetCount) * 100, 100);
+
+    if (batchState.running) {
+        titleEl.textContent = "Running batch inference and ranking";
+        textEl.textContent = "All saved configurations are now passing through the existing ML predictor asynchronously.";
+        badgeEl.textContent = `${batchState.targetCount} / ${batchState.targetCount}`;
+    } else if (batchState.rankedResults.length) {
+        titleEl.textContent = "Batch ranking complete";
+        textEl.textContent = batchState.helperMessage || "The ranked results are ready below.";
+        badgeEl.textContent = `${batchState.targetCount} / ${batchState.targetCount}`;
+    } else {
+        titleEl.textContent = `Configuration ${nextStep} of ${batchState.targetCount}`;
+        textEl.textContent = batchState.helperMessage || `Submit the current optical parameter set to store it in batchConfigs. The ML engine will not run until configuration ${batchState.targetCount} is submitted.`;
+        badgeEl.textContent = `${nextStep} / ${batchState.targetCount}`;
+    }
+
+    progressEl.style.width = `${progressPct}%`;
+    noteEl.textContent = `Temporary queue: ${capturedCount} of ${batchState.targetCount} configurations captured in batchConfigs.`;
+    resetBtn.disabled = capturedCount === 0 && batchState.rankedResults.length === 0;
+
+    renderBatchQueue();
+    updateSubmitButtonLabel();
+}
+
+function buildOptimizationConclusion(rankedResults) {
+    if (!rankedResults.length) return "";
+
+    const winner = rankedResults[0];
+    const runnerUp = rankedResults[1];
+    const input = winner.reportInputs || winner.inputConfig || {};
+    const snrLead = runnerUp ? Number(winner.hybrid_snr_db) - Number(runnerUp.hybrid_snr_db) : 0;
+    const berRatio = runnerUp
+        ? Number(runnerUp.post_fec_ber) / Math.max(Number(winner.post_fec_ber), 1e-15)
+        : null;
+    const parameterLine = `NA ${formatFixed(input.numerical_aperture, 3)}, track pitch ${formatFixed(input.track_pitch_nm, 0)} nm, temperature ${formatFixed(input.temperature_c, 1)} C, humidity ${formatFixed(input.relative_humidity, 1)}%, and sputtering rate ${formatFixed(input.sputtering_rate_nm_s, 1)} nm/s`;
+
+    if (!runnerUp) {
+        return `${winner.label} is the only configuration in the batch, and ${parameterLine} produced the strongest available Hybrid SNR / Post-FEC BER tradeoff.`;
+    }
+
+    const berLine = berRatio && Number.isFinite(berRatio)
+        ? `It also improved BER by ${berRatio.toFixed(2)}x compared with Rank 2.`
+        : "It also preserved the lowest Post-FEC BER in the batch.";
+
+    return `${winner.label} won because ${parameterLine} produced the highest combined optimization score. It achieved ${formatFixed(winner.hybrid_snr_db, 3)} dB Hybrid SNR with Post-FEC BER ${formatExponential(winner.post_fec_ber, 3)}, leading Rank 2 by ${snrLead.toFixed(3)} dB. ${berLine}`;
+}
+
+function renderBatchResults(rankedResults, summary) {
+    if (!rankedResults.length) return;
+
+    const winner = rankedResults[0];
+    const runnerUp = rankedResults[1];
+    const scoreSpread = Number(summary?.score_spread ?? (winner.optimization_score - rankedResults[rankedResults.length - 1].optimization_score));
+    const winnerInput = winner.reportInputs || winner.inputConfig || {};
+    const conclusion = buildOptimizationConclusion(rankedResults);
+    const snrLeadText = runnerUp
+        ? `Hybrid SNR lead vs Rank 2: +${(Number(winner.hybrid_snr_db) - Number(runnerUp.hybrid_snr_db)).toFixed(3)} dB`
+        : "Only configuration in the batch";
+
+    getEl("batchResultSummary").textContent = `${rankedResults.length} configurations were ranked. Rank 1 is ${winner.label} with the strongest Hybrid SNR / Post-FEC BER balance.`;
+    getEl("batchSizeValue").textContent = String(rankedResults.length);
+    getEl("batchBestSnrValue").textContent = `${formatFixed(summary?.best_hybrid_snr_db ?? winner.hybrid_snr_db, 3)} dB`;
+    getEl("batchLowestBerValue").textContent = formatExponential(summary?.lowest_post_fec_ber ?? winner.post_fec_ber, 3);
+    getEl("batchSpreadValue").textContent = formatFixed(scoreSpread, 3);
+
+    getEl("batchWinnerPanel").innerHTML = `
+        <div class="winner-header">
+            <div>
+                <div class="winner-label">Rank 1 Optimal Configuration</div>
+                <h3>${escapeHtml(winner.label)}</h3>
+            </div>
+            <span class="rank-badge rank-badge--winner">Rank ${winner.rank}</span>
+        </div>
+        <div class="winner-metrics">
+            <div class="winner-metric winner-stat">
+                <span>Hybrid SNR</span>
+                <strong>${formatFixed(winner.hybrid_snr_db, 3)} dB</strong>
+            </div>
+            <div class="winner-metric winner-stat">
+                <span>Post-FEC BER</span>
+                <strong>${formatExponential(winner.post_fec_ber, 3)}</strong>
+            </div>
+            <div class="winner-metric winner-stat">
+                <span>Optimization Score</span>
+                <strong>${formatFixed(winner.optimization_score ?? calculateOptimizationScore(winner.hybrid_snr_db, winner.post_fec_ber), 3)}</strong>
+            </div>
+        </div>
+        <div class="winner-parameter-grid">
+            <div class="winner-parameter"><span>Laser Wavelength</span><strong>${formatFixed(winnerInput.laser_wavelength_nm, 0)} nm</strong></div>
+            <div class="winner-parameter"><span>Numerical Aperture</span><strong>${formatFixed(winnerInput.numerical_aperture, 3)}</strong></div>
+            <div class="winner-parameter"><span>Track Pitch</span><strong>${formatFixed(winnerInput.track_pitch_nm, 0)} nm</strong></div>
+            <div class="winner-parameter"><span>Temperature</span><strong>${formatFixed(winnerInput.temperature_c, 1)} C</strong></div>
+            <div class="winner-parameter"><span>Humidity</span><strong>${formatFixed(winnerInput.relative_humidity, 1)}%</strong></div>
+            <div class="winner-parameter"><span>Sputtering Rate</span><strong>${formatFixed(winnerInput.sputtering_rate_nm_s, 1)} nm/s</strong></div>
+        </div>
+        <div class="winner-gain">${snrLeadText}</div>
+        <div class="conclusion-block" id="batchConclusionText">${escapeHtml(conclusion)}</div>
+    `;
+
+    getEl("batchRankingList").innerHTML = rankedResults.map((result) => {
+        const input = result.reportInputs || result.inputConfig || {};
+        return `
+            <article class="ranked-result-card ${result.rank === 1 ? "is-winner" : ""}">
+                <div class="ranked-card-head">
+                    <div>
+                        <h4>${escapeHtml(result.label)}</h4>
+                        <div class="table-muted">Material: ${escapeHtml(input.recording_material || "--")} | Modulation: ${escapeHtml(result.modulation || "--")}</div>
+                    </div>
+                    <span class="rank-badge ${result.rank === 1 ? "rank-badge--winner" : ""}">Rank ${result.rank}</span>
+                </div>
+                <div class="ranked-card-metrics">
+                    <div class="ranked-card-metric">
+                        <span>Hybrid SNR</span>
+                        <strong>${formatFixed(result.hybrid_snr_db, 3)} dB</strong>
+                    </div>
+                    <div class="ranked-card-metric">
+                        <span>Post-FEC BER</span>
+                        <strong>${formatExponential(result.post_fec_ber, 3)}</strong>
+                    </div>
+                    <div class="ranked-card-metric">
+                        <span>Score</span>
+                        <strong>${formatFixed(result.optimization_score ?? calculateOptimizationScore(result.hybrid_snr_db, result.post_fec_ber), 3)}</strong>
+                    </div>
+                </div>
+                <div class="batch-summary-text">
+                    Wavelength ${formatFixed(input.laser_wavelength_nm, 0)} nm | NA ${formatFixed(input.numerical_aperture, 3)} | Track ${formatFixed(input.track_pitch_nm, 0)} nm | Temp ${formatFixed(input.temperature_c, 1)} C | Humidity ${formatFixed(input.relative_humidity, 1)}% | Sputtering ${formatFixed(input.sputtering_rate_nm_s, 1)} nm/s
+                </div>
+            </article>
+        `;
+    }).join("");
+
+    getEl("batchSummaryBody").innerHTML = rankedResults.map((result) => {
+        const input = result.reportInputs || result.inputConfig || {};
+        return `
+            <tr class="${result.rank === 1 ? "table-highlight" : ""}">
+                <td>${result.rank}</td>
+                <td>${escapeHtml(result.label)}</td>
+                <td>${formatFixed(input.numerical_aperture, 3)}</td>
+                <td>${formatFixed(input.track_pitch_nm, 0)} nm</td>
+                <td>${formatFixed(input.temperature_c, 1)} C</td>
+                <td>${formatFixed(input.relative_humidity, 1)}%</td>
+                <td>${formatFixed(input.sputtering_rate_nm_s, 1)} nm/s</td>
+                <td>${formatFixed(result.hybrid_snr_db, 3)} dB</td>
+                <td>${formatExponential(result.post_fec_ber, 3)}</td>
+                <td>${formatFixed(result.optimization_score ?? calculateOptimizationScore(result.hybrid_snr_db, result.post_fec_ber), 3)}</td>
+            </tr>
+        `;
+    }).join("");
+
+    getEl("batchResult").style.display = "block";
+    getEl("downloadBatchPdfBtn").disabled = false;
+}
+
+function animateBatchResults() {
+    if (typeof gsap === "undefined") return;
+
+    const panel = getEl("batchResult");
+    const header = panel.querySelector(".batch-result-header");
+    const overviewCards = panel.querySelectorAll(".batch-overview-grid .metric-card");
+    const winnerPanel = panel.querySelector(".winner-panel");
+    const winnerStats = panel.querySelectorAll(".winner-stat");
+    const winnerParameters = panel.querySelectorAll(".winner-parameter");
+    const winnerGain = panel.querySelector(".winner-gain");
+    const conclusion = panel.querySelector(".conclusion-block");
+    const rankedCards = panel.querySelectorAll(".ranked-result-card");
+
+    const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
+    timeline
+        .from(header, { opacity: 0, y: 20, duration: 0.4 })
+        .from(overviewCards, { opacity: 0, y: 18, stagger: 0.08, duration: 0.32 }, "-=0.18")
+        .fromTo(winnerPanel, { opacity: 0, y: 26, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.5 }, "-=0.08")
+        .from(winnerStats, { opacity: 0, y: 14, stagger: 0.06, duration: 0.24 }, "-=0.28")
+        .from(winnerParameters, { opacity: 0, x: -18, stagger: 0.08, duration: 0.26 }, "-=0.18")
+        .from(winnerGain, { opacity: 0, scale: 0.82, duration: 0.28 }, "-=0.08")
+        .from(conclusion, { opacity: 0, x: 18, duration: 0.28 }, "-=0.16")
+        .from(rankedCards, { opacity: 0, y: 20, stagger: 0.1, duration: 0.34 }, "-=0.1");
+}
+
+function downloadBatchReport() {
+    if (!batchState.rankedResults.length) {
+        alert("Run a batch simulation before downloading the report.");
+        return;
+    }
+
+    const jsPDFCtor = window.jspdf?.jsPDF;
+    if (!jsPDFCtor) {
+        alert("jsPDF is unavailable in this browser session.");
+        return;
+    }
+
+    const doc = new jsPDFCtor({ orientation: "landscape", unit: "pt", format: "a4" });
+    if (typeof doc.autoTable !== "function") {
+        alert("jsPDF-AutoTable is unavailable in this browser session.");
+        return;
+    }
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const winner = batchState.rankedResults[0];
+    const runnerUp = batchState.rankedResults[1];
+    const conclusion = buildOptimizationConclusion(batchState.rankedResults);
+    const generatedAt = new Date().toLocaleString();
+
+    const rows = batchState.rankedResults.map((result) => {
+        const input = result.reportInputs || result.inputConfig || {};
+        return [
+            result.rank,
+            result.label,
+            formatFixed(input.laser_wavelength_nm, 0),
+            formatFixed(input.numerical_aperture, 3),
+            formatFixed(input.track_pitch_nm, 0),
+            formatFixed(input.temperature_c, 1),
+            formatFixed(input.relative_humidity, 1),
+            formatFixed(input.sputtering_rate_nm_s, 1),
+            formatFixed(result.hybrid_snr_db, 3),
+            formatExponential(result.post_fec_ber, 3),
+            formatFixed(result.optimization_score ?? calculateOptimizationScore(result.hybrid_snr_db, result.post_fec_ber), 3)
+        ];
+    });
+
+    doc.setFillColor(7, 10, 26);
+    doc.rect(0, 0, pageWidth, 88, "F");
+    doc.setTextColor(238, 242, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("OSIS Batch Simulation Report", 40, 42);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(185, 194, 234);
+    doc.text(`Generated: ${generatedAt}`, 40, 62);
+    doc.text("Ranking objective: maximize Hybrid SNR and minimize Post-FEC BER", 40, 78);
+
+    doc.setTextColor(31, 41, 55);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.text("Optimal Configuration Summary", 40, 118);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text(
+        `Rank 1: ${winner.label} | Hybrid SNR ${formatFixed(winner.hybrid_snr_db, 3)} dB | Post-FEC BER ${formatExponential(winner.post_fec_ber, 3)} | Score ${formatFixed(winner.optimization_score, 3)}`,
+        40,
+        138
+    );
+
+    const conclusionLines = doc.splitTextToSize(conclusion, pageWidth - 110);
+    const conclusionBoxHeight = 42 + (conclusionLines.length * 14);
+    doc.setFillColor(245, 248, 255);
+    doc.setDrawColor(210, 220, 236);
+    doc.roundedRect(36, 154, pageWidth - 72, conclusionBoxHeight, 12, 12, "FD");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(10, 16, 48);
+    doc.text("Optimization Conclusion", 52, 178);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(55, 65, 81);
+    doc.text(conclusionLines, 52, 196);
+
+    doc.autoTable({
+        startY: 154 + conclusionBoxHeight + 18,
+        head: [[
+            "Rank",
+            "Config",
+            "Wavelength (nm)",
+            "NA",
+            "Track Pitch (nm)",
+            "Temp (C)",
+            "Humidity (%)",
+            "Sputtering (nm/s)",
+            "Hybrid SNR (dB)",
+            "Post-FEC BER",
+            "Score"
+        ]],
+        body: rows,
+        theme: "grid",
+        styles: {
+            fontSize: 9,
+            cellPadding: 6,
+            textColor: [31, 41, 55],
+            lineColor: [214, 223, 239]
+        },
+        headStyles: {
+            fillColor: [10, 16, 48],
+            textColor: [238, 242, 255],
+            fontStyle: "bold"
+        },
+        alternateRowStyles: {
+            fillColor: [247, 250, 255]
+        },
+        didParseCell(data) {
+            if (data.section === "body" && batchState.rankedResults[data.row.index]?.rank === 1) {
+                data.cell.styles.fillColor = [255, 248, 220];
+                data.cell.styles.textColor = [31, 41, 55];
+                data.cell.styles.fontStyle = "bold";
+            }
+        }
+    });
+
+    const footerY = doc.lastAutoTable.finalY + 20;
+    const runnerUpText = runnerUp
+        ? `Rank 1 led Rank 2 by ${(Number(winner.hybrid_snr_db) - Number(runnerUp.hybrid_snr_db)).toFixed(3)} dB in Hybrid SNR.`
+        : "Only one configuration was included in this batch.";
+    doc.setFontSize(9);
+    doc.setTextColor(75, 85, 99);
+    doc.text("Optimization score = Hybrid SNR - 10*log10(Post-FEC BER).", 40, footerY);
+    doc.text(runnerUpText, 40, footerY + 14);
+
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    doc.save(`osis-batch-simulation-report-${dateStamp}.pdf`);
+}
+
+function resetBatchWorkflow(keepMode) {
+    batchState.batchConfigs = [];
+    batchState.rankedResults = [];
+    batchState.running = false;
+    batchState.enabled = keepMode;
+    batchState.helperMessage = batchState.enabled ? "Batch queue cleared. Start again with configuration 1." : "";
+    clearBatchResults();
+    updateBatchUi();
+}
+
+async function runSingleAnalysis() {
+    const btn = getPrimarySubmitButton();
+    const originalText = btn.dataset.singleLabel || btn.textContent;
     btn.textContent = "Running analysis...";
     btn.disabled = true;
 
     try {
         const basePayload = buildPayload();
-        const modulation = document.getElementById("modulation").value;
-        const measuredInput = document.getElementById("measured_snr").value.trim();
-        const topK = parseInt(document.getElementById("top_k").value) || 3;
-        const deltaFraction = parseFloat(document.getElementById("delta_fraction").value) || 0.05;
-        const sweepParameter = document.getElementById("sweep_param").value;
-        const simStart = parseFloat(document.getElementById("sim_start").value);
-        const simEnd = parseFloat(document.getElementById("sim_end").value);
-        const simSteps = parseInt(document.getElementById("sim_steps").value) || 20;
+        const modulation = getEl("modulation").value;
+        const measuredInput = getEl("measured_snr").value.trim();
+        const topK = parseInt(getEl("top_k").value, 10) || 3;
+        const deltaFraction = parseFloat(getEl("delta_fraction").value) || 0.05;
+        const sweepParameter = getEl("sweep_param").value;
+        const simStart = parseFloat(getEl("sim_start").value);
+        const simEnd = parseFloat(getEl("sim_end").value);
+        const simSteps = parseInt(getEl("sim_steps").value, 10) || 20;
 
         const comparisonPayload = { ...basePayload, modulation };
         if (measuredInput !== "") {
@@ -328,22 +810,19 @@ document.getElementById("osisForm").addEventListener("submit", async (e) => {
         renderSensitivityList(sensData.ranked_sensitivity || []);
         renderShap(snrData.shap_explanations || []);
         renderComparisonText(cmpData);
+
         const frames = (simData && simData.frames) ? simData.frames : [];
         renderSensitivitySweep(frames);
         renderSimulationChart(frames, sweepParameter);
 
-        const simMeta = document.getElementById("simMeta");
+        const simMeta = getEl("simMeta");
         if (simMeta) {
             simMeta.textContent = `${frames.length} frames generated for ${sweepParameter} sweep from ${simStart} to ${simEnd}.`;
         }
 
-        const resultDiv = document.getElementById("result");
+        const resultDiv = getEl("result");
         resultDiv.style.display = "block";
-        if (typeof lenis !== 'undefined') {
-            lenis.scrollTo(resultDiv, { offset: -100 });
-        } else {
-            resultDiv.scrollIntoView({ behavior: "smooth" });
-        }
+        scrollToElement(resultDiv);
     } catch (error) {
         console.error(error);
         alert("Analysis failed. Ensure backend is running and inputs are valid.");
@@ -351,6 +830,153 @@ document.getElementById("osisForm").addEventListener("submit", async (e) => {
         btn.textContent = originalText;
         btn.disabled = false;
     }
+}
+
+async function runBatchInference() {
+    const btn = getPrimarySubmitButton();
+    batchState.running = true;
+    batchState.helperMessage = "All configurations captured. Running asynchronous batch inference and optimization ranking.";
+    updateBatchUi();
+    btn.textContent = "Ranking batch configurations...";
+    btn.disabled = true;
+
+    try {
+        const response = await postJson("/api/v1/batch_simulations", {
+            modulation: getEl("modulation").value,
+            batchConfigs: batchState.batchConfigs.map((snapshot) => ({
+                clientId: snapshot.clientId,
+                label: snapshot.label,
+                modulation: snapshot.modulation,
+                config: snapshot.config
+            }))
+        });
+
+        const snapshotMap = new Map(batchState.batchConfigs.map((snapshot) => [snapshot.clientId, snapshot]));
+        batchState.rankedResults = (response.rankedResults || []).map((result) => {
+            const snapshot = snapshotMap.get(result.clientId);
+            return {
+                ...result,
+                label: snapshot?.label || result.label,
+                reportInputs: snapshot?.reportInputs || result.inputConfig || {}
+            };
+        });
+
+        batchState.helperMessage = `Batch ranking complete. ${batchState.rankedResults[0]?.label || "Rank 1"} is highlighted as the optimal configuration.`;
+        renderBatchResults(batchState.rankedResults, response.summary || {});
+        animateBatchResults();
+        scrollToElement(getEl("batchResult"));
+    } catch (error) {
+        console.error(error);
+        batchState.helperMessage = "Batch inference failed. Review the queued configurations and try again.";
+        alert("Batch simulation failed. Ensure backend is running and all saved configurations are valid.");
+    } finally {
+        batchState.running = false;
+        btn.disabled = false;
+        updateBatchUi();
+    }
+}
+
+async function handleBatchSubmit() {
+    const btn = getPrimarySubmitButton();
+    btn.disabled = true;
+
+    try {
+        const snapshot = buildBatchSnapshot();
+        batchState.batchConfigs = [...batchState.batchConfigs, snapshot];
+        clearBatchResults();
+
+        if (batchState.batchConfigs.length < batchState.targetCount) {
+            const nextStep = batchState.batchConfigs.length + 1;
+            batchState.helperMessage = `${snapshot.label} stored. Update the form for configuration ${nextStep} of ${batchState.targetCount} and submit again.`;
+            updateBatchUi();
+            return;
+        }
+
+        await runBatchInference();
+    } finally {
+        if (!batchState.running) {
+            btn.disabled = false;
+            updateBatchUi();
+        }
+    }
+}
+
+const triggerInputs = ["wavelength", "na", "track_pitch", "layer_spacing"];
+triggerInputs.forEach(id => {
+    getEl(id).addEventListener("input", () => {
+        const formatSelect = getEl("disc_format");
+        if (formatSelect) formatSelect.value = "custom";
+        calculatePhysics();
+    });
+});
+
+const formatEl = getEl("disc_format");
+if (formatEl) {
+    formatEl.addEventListener("change", (e) => {
+        const format = e.target.value;
+        if (format === "cd") {
+            getEl("wavelength").value = "780";
+            getEl("na").value = "0.45";
+            getEl("track_pitch").value = "1600";
+            getEl("layer_spacing").value = "0";
+            getEl("layer_count").value = "1";
+        } else if (format === "dvd") {
+            getEl("wavelength").value = "650";
+            getEl("na").value = "0.60";
+            getEl("track_pitch").value = "740";
+            getEl("layer_spacing").value = "55000";
+            getEl("layer_count").value = "2";
+        } else if (format === "bd") {
+            getEl("wavelength").value = "405";
+            getEl("na").value = "0.85";
+            getEl("track_pitch").value = "320";
+            getEl("layer_spacing").value = "25000";
+            getEl("layer_count").value = "2";
+        }
+        calculatePhysics();
+    });
+}
+getEl("sweep_param").addEventListener("change", applySweepDefaults);
+
+calculatePhysics();
+applySweepDefaults();
+clearBatchResults();
+updateBatchUi();
+
+getEl("batch_mode").addEventListener("change", (e) => {
+    resetBatchWorkflow(e.target.checked);
+});
+
+getEl("batch_count").addEventListener("change", () => {
+    const nextCount = clampBatchCount(getEl("batch_count").value);
+    const countChanged = nextCount !== batchState.targetCount;
+    batchState.targetCount = nextCount;
+    getEl("batch_count").value = String(nextCount);
+
+    if (countChanged && (batchState.batchConfigs.length || batchState.rankedResults.length)) {
+        batchState.batchConfigs = [];
+        batchState.helperMessage = "Batch size changed. The temporary queue was cleared to avoid mixing steps.";
+        clearBatchResults();
+    }
+
+    updateBatchUi();
+});
+
+getEl("resetBatchBtn").addEventListener("click", () => {
+    resetBatchWorkflow(batchState.enabled);
+});
+
+getEl("downloadBatchPdfBtn").addEventListener("click", downloadBatchReport);
+
+getEl("osisForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (batchState.enabled) {
+        await handleBatchSubmit();
+        return;
+    }
+
+    await runSingleAnalysis();
 });
 
 // ================================================================
@@ -403,8 +1029,7 @@ document.getElementById('runPlatformSimBtn')?.addEventListener('click', async (e
             }
         };
 
-        const baseUrl = (window.location.port === "5501") ? "http://127.0.0.1:8000" : "";
-        const res = await fetch(baseUrl + '/api/v1/simulate_platform', {
+        const res = await fetch(BASE_URL + '/api/v1/simulate_platform', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

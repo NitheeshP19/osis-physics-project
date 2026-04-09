@@ -73,11 +73,11 @@ def train():
     print("\n--- PHASE 1: BAYESIAN HYPERPARAMETER OPTIMIZATION (OPTUNA) ---")
     def objective(trial):
         params = {
-            'n_estimators': trial.suggest_int('n_estimators', 50, 60),
-            'learning_rate': trial.suggest_float('learning_rate', 0.1, 0.2),
-            'max_depth': trial.suggest_int('max_depth', 3, 5),
-            'min_samples_split': trial.suggest_int('min_samples_split', 2, 4),
-            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 2)
+            'n_estimators': trial.suggest_int('n_estimators', 150, 300),
+            'learning_rate': trial.suggest_float('learning_rate', 0.05, 0.2),
+            'max_depth': trial.suggest_int('max_depth', 5, 8),
+            'min_samples_split': trial.suggest_int('min_samples_split', 2, 5),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 3)
         }
         
         model = GradientBoostingRegressor(**params, random_state=42)
@@ -85,18 +85,17 @@ def train():
         return score
 
     study = optuna.create_study(direction="maximize")
-    # ONLY 1 TRIAL FOR FAST DEMONSTRATION SPEED
-    study.optimize(objective, n_trials=1) 
+    study.optimize(objective, n_trials=5) 
     best_params = study.best_params
     print("Optimization Complete. Best Params:", best_params)
 
     print("\n--- PHASE 2: TRAINING HETEROGENEOUS ENSEMBLE ---")
     gb_opt = GradientBoostingRegressor(**best_params, random_state=42)
-    rf = RandomForestRegressor(n_estimators=30, max_depth=5, random_state=42)
+    rf = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
     
     ensemble = StackingRegressor(
         estimators=[('gb', gb_opt), ('rf', rf)],
-        final_estimator=GradientBoostingRegressor(n_estimators=20, random_state=42)
+        final_estimator=GradientBoostingRegressor(n_estimators=50, random_state=42)
     )
     ensemble.fit(X_train, y_train)
 
@@ -125,7 +124,7 @@ def train():
     print(f"Ensemble MAE:      {mae:.4f} dB")
 
     if r2 > 0.99:
-        print("✅ SUCCESS: Advanced ML Model Exceeded Baseline Target!")
+        print(" SUCCESS: Advanced ML Model Exceeded Baseline Target!")
 
     print("\n--- SAVING ARTIFACTS ---")
     joblib.dump(ensemble, MODEL_FILE)
@@ -138,7 +137,7 @@ def train():
     bg_data = X_train.sample(10, random_state=42)
     joblib.dump(bg_data, SHAP_BACKGROUND)
     
-    print("✅ All advanced components successfully exported.")
+    print("All advanced components successfully exported.")
 
 if __name__ == "__main__":
     train()

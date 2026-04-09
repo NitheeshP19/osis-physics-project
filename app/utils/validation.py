@@ -44,6 +44,16 @@ class SimulationInput(BaseModel):
     steps: int = Field(20, ge=5, le=100)
     modulation: str = "OOK-NRZ"
 
+class BatchSimulationItem(BaseModel):
+    clientId: str = Field(..., min_length=1, max_length=100)
+    label: Optional[str] = None
+    config: OSISInput
+    modulation: Optional[str] = None
+
+class BatchSimulationRequest(BaseModel):
+    batchConfigs: List[BatchSimulationItem] = Field(..., min_length=1, max_length=25)
+    modulation: str = "OOK-NRZ"
+
 # Advanced Platform Payload definition
 class StackLayerConfig(BaseModel):
     layerName: str

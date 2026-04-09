@@ -604,6 +604,430 @@
       color: var(--text-soft);
     }
 
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .secondary-btn {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #e8f2ff;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.78rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .secondary-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(52, 245, 255, 0.42);
+      background: rgba(52, 245, 255, 0.08);
+    }
+
+    .batch-mode-shell {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 14px;
+      margin-top: 0.25rem;
+    }
+
+    .batch-toggle-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 220px;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .batch-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.04);
+      font-weight: 600;
+      color: #eef4ff;
+      min-height: 100%;
+    }
+
+    .batch-toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--neon-cyan);
+      flex: 0 0 auto;
+    }
+
+    .batch-count-group {
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.04);
+      justify-content: center;
+    }
+
+    .batch-count-group input {
+      margin-top: 2px;
+    }
+
+    .batch-wizard {
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background:
+        radial-gradient(circle at top right, rgba(52, 245, 255, 0.12), transparent 32%),
+        rgba(10, 18, 48, 0.62);
+      box-shadow: 0 0 22px rgba(52, 245, 255, 0.08);
+      display: grid;
+      gap: 14px;
+    }
+
+    .wizard-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .wizard-kicker {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--neon-cyan);
+      margin-bottom: 4px;
+    }
+
+    .batch-wizard h3 {
+      font-size: 1.08rem;
+      color: #f4f8ff;
+    }
+
+    .wizard-step-badge {
+      min-width: 84px;
+      padding: 0.5rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(52, 245, 255, 0.25);
+      background: rgba(52, 245, 255, 0.08);
+      text-align: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.84rem;
+      color: #effcff;
+    }
+
+    .wizard-text {
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+
+    .batch-progress {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .batch-progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(52, 245, 255, 0.85), rgba(154, 107, 255, 0.88));
+      box-shadow: 0 0 16px rgba(52, 245, 255, 0.35);
+      transition: width 0.28s ease;
+    }
+
+    .batch-chip-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .batch-chip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: #eaf4ff;
+      font-size: 0.88rem;
+    }
+
+    .batch-chip strong {
+      color: #ffffff;
+    }
+
+    .batch-chip small {
+      color: var(--text-soft);
+    }
+
+    .batch-inline-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .batch-inline-note {
+      color: var(--text-soft);
+      font-size: 0.84rem;
+    }
+
+    #batchResult {
+      grid-column: 1 / -1;
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      background:
+        radial-gradient(circle at top right, rgba(52, 245, 255, 0.14), transparent 34%),
+        rgba(148, 163, 184, 0.08);
+      border: 1px solid rgba(52, 245, 255, 0.2);
+      display: none;
+      animation: fadeIn 0.35s ease-out;
+    }
+
+    .batch-result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .batch-result-header h2 {
+      margin: 0 0 6px;
+      color: #ecfeff;
+      font-size: 1.4rem;
+    }
+
+    .batch-result-subtitle {
+      color: var(--text-soft);
+      font-size: 0.92rem;
+      max-width: 700px;
+    }
+
+    .batch-overview-grid {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .batch-ranked-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .winner-panel {
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 215, 64, 0.35);
+      background:
+        radial-gradient(circle at top left, rgba(255, 215, 64, 0.14), transparent 34%),
+        linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(15, 23, 42, 0.78));
+      box-shadow: 0 0 24px rgba(255, 215, 64, 0.12);
+    }
+
+    .winner-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .winner-label {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #facc15;
+      margin-bottom: 4px;
+    }
+
+    .winner-header h3 {
+      margin: 0;
+      font-size: 1.24rem;
+      color: #fff8dc;
+    }
+
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.45rem 0.72rem;
+      border-radius: 999px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.78rem;
+      color: #effcff;
+      border: 1px solid rgba(52, 245, 255, 0.28);
+      background: rgba(52, 245, 255, 0.08);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .rank-badge.rank-badge--winner {
+      color: #1f2937;
+      background: linear-gradient(135deg, rgba(255, 232, 141, 0.95), rgba(255, 215, 64, 0.95));
+      border-color: rgba(255, 215, 64, 0.7);
+      box-shadow: 0 0 18px rgba(255, 215, 64, 0.28);
+    }
+
+    .winner-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .winner-metric {
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .winner-metric span {
+      display: block;
+      color: var(--text-soft);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .winner-metric strong {
+      color: #ffffff;
+      font-size: 1.08rem;
+    }
+
+    .winner-parameter-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .winner-parameter {
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .winner-parameter span {
+      display: block;
+      color: var(--text-soft);
+      font-size: 0.78rem;
+      margin-bottom: 5px;
+    }
+
+    .winner-parameter strong {
+      color: #f8fbff;
+      font-size: 0.98rem;
+    }
+
+    .winner-gain {
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(250, 204, 21, 0.12);
+      border: 1px solid rgba(250, 204, 21, 0.28);
+      color: #fef3c7;
+      font-weight: 600;
+    }
+
+    .conclusion-block {
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(52, 245, 255, 0.18);
+      background: rgba(52, 245, 255, 0.06);
+      color: #e8faff;
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+
+    .batch-ranking-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .ranked-result-card {
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(15, 23, 42, 0.58);
+      box-shadow: 0 0 18px rgba(0, 0, 0, 0.14);
+    }
+
+    .ranked-result-card.is-winner {
+      border-color: rgba(250, 204, 21, 0.28);
+      background: linear-gradient(145deg, rgba(250, 204, 21, 0.08), rgba(15, 23, 42, 0.7));
+    }
+
+    .ranked-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .ranked-card-head h4 {
+      margin: 0;
+      color: #f5f9ff;
+      font-size: 1rem;
+    }
+
+    .ranked-card-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .ranked-card-metric {
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .ranked-card-metric span {
+      display: block;
+      color: var(--text-soft);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .ranked-card-metric strong {
+      color: #ffffff;
+      font-size: 0.96rem;
+    }
+
+    .batch-summary-text {
+      color: var(--text-soft);
+      font-size: 0.86rem;
+      line-height: 1.6;
+    }
+
+    .table-highlight {
+      background: rgba(250, 204, 21, 0.08);
+    }
+
+    .table-muted {
+      color: var(--text-soft);
+      font-size: 0.8rem;
+    }
+
     .chart-container {
       margin-top: 1.5rem;
       position: relative;
@@ -651,6 +1075,17 @@
       .result-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
+
+      .batch-overview-grid,
+      .winner-metrics,
+      .ranked-card-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .batch-ranked-layout,
+      .batch-toggle-row {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 760px) {
@@ -671,12 +1106,28 @@
         grid-template-columns: 1fr;
       }
 
+      .batch-overview-grid,
+      .winner-metrics,
+      .winner-parameter-grid,
+      .ranked-card-metrics {
+        grid-template-columns: 1fr;
+      }
+
       .hero-panel {
         padding: 24px 20px;
       }
 
       .predictor-panel {
         padding: 20px;
+      }
+
+      .wizard-head,
+      .batch-result-header,
+      .ranked-card-head,
+      .batch-chip,
+      .winner-header {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
 
@@ -1162,6 +1613,49 @@
             <input type="number" id="sim_steps" min="5" max="100" step="1" value="20" />
           </div>
 
+          <div class="predictor-section-title">Batch Simulation</div>
+
+          <div class="batch-mode-shell">
+            <div class="batch-toggle-row">
+              <label class="batch-toggle" for="batch_mode">
+                <input type="checkbox" id="batch_mode" />
+                <span>Batch Simulation Mode</span>
+              </label>
+
+              <div class="input-group batch-count-group">
+                <label for="batch_count">Number of Simulations</label>
+                <input type="number" id="batch_count" min="2" max="12" step="1" value="4" />
+              </div>
+            </div>
+
+            <div class="batch-wizard" id="batchWizard">
+              <div class="wizard-head">
+                <div>
+                  <div class="wizard-kicker">Sequential Batch Capture</div>
+                  <h3 id="batchWizardTitle">Single-run mode is active</h3>
+                </div>
+                <div class="wizard-step-badge" id="batchStepBadge">1 / 1</div>
+              </div>
+
+              <p class="wizard-text" id="batchWizardText">
+                Enable batch mode to queue multiple OSIS configurations before the ML model and ranking engine start.
+              </p>
+
+              <div class="batch-progress">
+                <div class="batch-progress-bar" id="batchProgressBar"></div>
+              </div>
+
+              <div class="batch-chip-list" id="batchConfigList"></div>
+
+              <div class="batch-inline-actions">
+                <span class="batch-inline-note" id="batchInlineNote">
+                  Batch ranking uses Hybrid SNR and Post-FEC BER after all configurations are collected.
+                </span>
+                <button type="button" class="secondary-btn" id="resetBatchBtn">Reset Batch Queue</button>
+              </div>
+            </div>
+          </div>
+
           <button type="submit" class="submit-btn">Run Full Performance Analysis</button>
 
           <div id="result">
@@ -1236,6 +1730,68 @@
             <div class="result-section">
               <h3>Analytical vs ML Comparison</h3>
               <div class="tiny" id="comparisonText">--</div>
+            </div>
+          </div>
+
+          <div id="batchResult">
+            <div class="batch-result-header">
+              <div>
+                <h2>OSIS Batch Simulation Report</h2>
+                <div class="batch-result-subtitle" id="batchResultSummary">
+                  Ranked batch simulations will appear here after the final configuration is submitted.
+                </div>
+              </div>
+              <button type="button" class="secondary-btn" id="downloadBatchPdfBtn">Download PDF Report</button>
+            </div>
+
+            <div class="batch-overview-grid">
+              <div class="metric-card">
+                <div class="metric-label">Batch Size</div>
+                <div class="metric-value" id="batchSizeValue">--</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Best Hybrid SNR</div>
+                <div class="metric-value" id="batchBestSnrValue">-- dB</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Lowest Post-FEC BER</div>
+                <div class="metric-value" id="batchLowestBerValue">--</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Score Spread</div>
+                <div class="metric-value" id="batchSpreadValue">--</div>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <h3>Optimization Reveal</h3>
+              <div class="batch-ranked-layout">
+                <div class="winner-panel" id="batchWinnerPanel"></div>
+                <div class="batch-ranking-list" id="batchRankingList"></div>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <h3>Batch Summary Table</h3>
+              <div class="table-responsive">
+                <table class="result-table">
+                  <thead>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Config</th>
+                      <th>NA</th>
+                      <th>Track Pitch</th>
+                      <th>Temp</th>
+                      <th>Humidity</th>
+                      <th>Sputtering</th>
+                      <th>Hybrid SNR</th>
+                      <th>Post-FEC BER</th>
+                      <th>Score</th>
+                    </tr>
+                  </thead>
+                  <tbody id="batchSummaryBody"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </form>
@@ -1549,7 +2105,10 @@
     }
     requestAnimationFrame(raf);
   </script>
-  
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

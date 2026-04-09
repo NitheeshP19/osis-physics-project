@@ -117,9 +117,9 @@ try:
     print("-" * 30)
     
     if r2 > 0.99:
-        print("✅ Status: EXCELLENT (Target > 0.99 met)")
+        print("Status: EXCELLENT (Target > 0.99 met)")
     else:
-        print("⚠️ Status: NEEDS IMPROVEMENT")
+        print("Status: NEEDS IMPROVEMENT")
 
 except Exception as e:
     print(f"An error occurred: {e}")

@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  osis-api:
+    build: .
+    container_name: osis_fastapi
+    ports:
+      - "8000:8000"
+    restart: unless-stopped

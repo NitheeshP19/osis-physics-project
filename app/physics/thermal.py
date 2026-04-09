@@ -32,13 +32,13 @@ def approximate_thermal_pulse(thermal_config: Dict[str, Any], optical_config: Di
     for i in range(1, steps):
         dt = time_times[i] - time_times[i-1]
         
-        # Adding heat if laser is on
-        heat_in = pulse[i] * power_heat_rate * dt
+        heat_rate = pulse[i] * power_heat_rate
         
-        # Heat dissipating based on Newton's law of cooling approx
-        heat_out = cooling_rate * (current_temp - ambient) * dt
+        # Analytically exact solution to dT/dt = -cooling_rate * (T - ambient) + heat_rate
+        # to avoid numerical explosion for large time steps.
+        target_temp = ambient + (heat_rate / cooling_rate if cooling_rate > 0 else 0)
+        current_temp = target_temp + (current_temp - target_temp) * np.exp(-cooling_rate * dt)
         
-        current_temp += (heat_in - heat_out)
         current_temp = min(current_temp, 3000.0)  # Cap at 3000K (physical limit for optical media)
         temp[i] = current_temp
 
