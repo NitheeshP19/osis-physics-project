@@ -627,6 +627,86 @@
       background: rgba(52, 245, 255, 0.08);
     }
 
+    .api-connection-shell {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background:
+        radial-gradient(circle at top right, rgba(52, 245, 255, 0.1), transparent 28%),
+        rgba(255, 255, 255, 0.04);
+    }
+
+    .api-connection-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .api-connection-head h3 {
+      margin: 0 0 4px;
+      font-size: 1rem;
+      color: #f2f7ff;
+    }
+
+    .api-connection-copy {
+      color: var(--text-soft);
+      font-size: 0.88rem;
+      max-width: 700px;
+    }
+
+    .api-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.5rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #e6f4ff;
+      white-space: nowrap;
+    }
+
+    .api-status-badge[data-state="connected"] {
+      border-color: rgba(52, 211, 153, 0.4);
+      background: rgba(52, 211, 153, 0.14);
+      color: #d1fae5;
+    }
+
+    .api-status-badge[data-state="checking"] {
+      border-color: rgba(52, 245, 255, 0.35);
+      background: rgba(52, 245, 255, 0.12);
+      color: #cffafe;
+    }
+
+    .api-status-badge[data-state="error"] {
+      border-color: rgba(244, 63, 94, 0.35);
+      background: rgba(244, 63, 94, 0.12);
+      color: #fecdd3;
+    }
+
+    .api-connection-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .api-base-line {
+      color: var(--text-soft);
+      font-size: 0.84rem;
+      line-height: 1.6;
+    }
+
+    .api-base-line strong {
+      color: #f7fbff;
+    }
+
     .batch-mode-shell {
       grid-column: 1 / -1;
       display: grid;
@@ -1085,6 +1165,11 @@
       .batch-ranked-layout,
       .batch-toggle-row {
         grid-template-columns: 1fr;
+      }
+
+      .api-connection-head {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
 
@@ -1554,6 +1639,32 @@
           </div>
 
           <div class="predictor-section-title">Advanced Controls</div>
+
+          <div class="api-connection-shell">
+            <div class="api-connection-head">
+              <div>
+                <h3>API Connection</h3>
+                <div class="api-connection-copy">
+                  Point the UI at the OSIS backend API. Leave it blank to use the same origin, or set a full base URL like `http://127.0.0.1:8000`.
+                </div>
+              </div>
+              <div class="api-status-badge" id="apiStatusBadge" data-state="checking">Checking API...</div>
+            </div>
+
+            <div class="input-group">
+              <label for="api_base_url">API Base URL</label>
+              <input type="text" id="api_base_url" placeholder="Same origin or http://127.0.0.1:8000" />
+            </div>
+
+            <div class="api-connection-actions">
+              <button type="button" class="secondary-btn" id="saveApiBaseBtn">Save API Endpoint</button>
+              <button type="button" class="secondary-btn" id="testApiConnectionBtn">Test API Connection</button>
+            </div>
+
+            <div class="api-base-line" id="apiBaseDisplay">
+              <strong>Active API:</strong> Resolving...
+            </div>
+          </div>
 
           <div class="input-group">
             <label for="simulation_mode">Simulation Engine</label>

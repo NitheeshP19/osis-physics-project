@@ -1,4 +1,35 @@
-const BASE_URL = (window.location.port === "5501") ? "http://127.0.0.1:8000" : "";
+const API_BASE_STORAGE_KEY = "osis.apiBaseUrl";
+
+function normalizeApiBaseUrl(value) {
+    let trimmed = String(value ?? "").trim();
+    if (!trimmed) return "";
+    if (!/^https?:\/\//i.test(trimmed) && /^(localhost|\d{1,3}(?:\.\d{1,3}){3}|[\w.-]+\.[a-z]{2,})(:\d+)?(\/.*)?$/i.test(trimmed)) {
+        trimmed = `http://${trimmed}`;
+    }
+    return trimmed.replace(/\/+$/, "");
+}
+
+function resolveInitialApiBaseUrl() {
+    const queryBase = normalizeApiBaseUrl(new URLSearchParams(window.location.search).get("api_base"));
+    if (queryBase) {
+        window.localStorage.setItem(API_BASE_STORAGE_KEY, queryBase);
+        return queryBase;
+    }
+
+    const globalBase = normalizeApiBaseUrl(window.__OSIS_API_BASE__);
+    if (globalBase) return globalBase;
+
+    const storedBase = normalizeApiBaseUrl(window.localStorage.getItem(API_BASE_STORAGE_KEY));
+    if (storedBase) return storedBase;
+
+    if (window.location.protocol === "file:" || window.location.port === "5501") {
+        return "http://127.0.0.1:8000";
+    }
+
+    return "";
+}
+
+let apiBaseUrl = resolveInitialApiBaseUrl();
 
 const batchState = {
     enabled: false,
@@ -11,6 +42,64 @@ const batchState = {
 
 function getEl(id) {
     return document.getElementById(id);
+}
+
+function getApiUrl(path) {
+    return `${apiBaseUrl}${path}`;
+}
+
+function getActiveApiLabel(baseUrl = apiBaseUrl) {
+    return baseUrl || `${window.location.origin} (same origin)`;
+}
+
+function updateApiConnectionUi(state, message, displayBase = apiBaseUrl) {
+    const input = getEl("api_base_url");
+    const badge = getEl("apiStatusBadge");
+    const display = getEl("apiBaseDisplay");
+    if (!input || !badge || !display) return;
+
+    input.value = displayBase;
+    badge.dataset.state = state;
+    badge.textContent = message;
+    display.innerHTML = `<strong>Active API:</strong> ${escapeHtml(getActiveApiLabel(displayBase))}`;
+}
+
+function setApiBaseUrl(nextBaseUrl, persist = true) {
+    apiBaseUrl = normalizeApiBaseUrl(nextBaseUrl);
+
+    if (persist) {
+        if (apiBaseUrl) {
+            window.localStorage.setItem(API_BASE_STORAGE_KEY, apiBaseUrl);
+        } else {
+            window.localStorage.removeItem(API_BASE_STORAGE_KEY);
+        }
+    }
+
+    updateApiConnectionUi("checking", "API endpoint updated");
+}
+
+async function checkApiConnection(candidateBaseUrl = apiBaseUrl) {
+    const targetBaseUrl = normalizeApiBaseUrl(candidateBaseUrl);
+    updateApiConnectionUi("checking", "Checking API...", targetBaseUrl);
+
+    try {
+        const response = await fetch(`${targetBaseUrl}/api/v1/health`, {
+            method: "GET",
+            headers: { "Accept": "application/json" }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Health check failed with status ${response.status}`);
+        }
+
+        const payload = await response.json();
+        updateApiConnectionUi("connected", `${payload.service || "OSIS API"} connected`, targetBaseUrl);
+        return true;
+    } catch (error) {
+        console.error(error);
+        updateApiConnectionUi("error", "API unreachable", targetBaseUrl);
+        return false;
+    }
 }
 
 function formatFixed(value, digits = 3, suffix = "") {
@@ -106,7 +195,7 @@ function buildPayload() {
 }
 
 async function postJson(url, payload) {
-    const response = await fetch(BASE_URL + url, {
+    const response = await fetch(getApiUrl(url), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -942,9 +1031,26 @@ calculatePhysics();
 applySweepDefaults();
 clearBatchResults();
 updateBatchUi();
+updateApiConnectionUi("checking", "Resolving API...");
 
 getEl("batch_mode").addEventListener("change", (e) => {
     resetBatchWorkflow(e.target.checked);
+});
+
+getEl("saveApiBaseBtn").addEventListener("click", async () => {
+    setApiBaseUrl(getEl("api_base_url").value);
+    const connected = await checkApiConnection();
+    if (!connected) {
+        alert("The API base URL was saved, but the backend did not respond to the health check.");
+    }
+});
+
+getEl("testApiConnectionBtn").addEventListener("click", async () => {
+    const connected = await checkApiConnection(getEl("api_base_url").value);
+    if (!connected) {
+        alert("Unable to reach the OSIS API with the current endpoint.");
+        updateApiConnectionUi("error", "API unreachable");
+    }
 });
 
 getEl("batch_count").addEventListener("change", () => {
@@ -978,6 +1084,8 @@ getEl("osisForm").addEventListener("submit", async (e) => {
 
     await runSingleAnalysis();
 });
+
+checkApiConnection();
 
 // ================================================================
 // PLATFORM SIMULATION DASHBOARD
@@ -1029,7 +1137,7 @@ document.getElementById('runPlatformSimBtn')?.addEventListener('click', async (e
             }
         };
 
-        const res = await fetch(BASE_URL + '/api/v1/simulate_platform', {
+        const res = await fetch(getApiUrl('/api/v1/simulate_platform'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
