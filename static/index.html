@@ -420,6 +420,11 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 1.25rem;
+      align-items: start;
+    }
+
+    .predictor-form > * {
+      min-width: 0;
     }
 
     .predictor-section-title {
@@ -438,16 +443,21 @@
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      min-width: 0;
     }
 
     label {
       font-size: 0.875rem;
       font-weight: 500;
       color: var(--text-soft);
+      overflow-wrap: anywhere;
     }
 
     input,
     select {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
       background: rgba(15, 23, 42, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.16);
       border-radius: 0.5rem;
@@ -1128,7 +1138,12 @@
       }
 
       .predictor-panel {
-        padding: 20px;
+        padding: 20px 16px;
+      }
+
+      .predictor-form {
+        grid-template-columns: 1fr;
+        gap: 1rem;
       }
 
       .wizard-head,
