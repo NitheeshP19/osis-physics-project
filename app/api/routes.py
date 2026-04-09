@@ -24,14 +24,6 @@ import math
 router = APIRouter()
 
 
-@router.get("/api/v1/health")
-async def health_check():
-    return {
-        "status": "ok",
-        "service": "OSIS Hybrid Simulation Platform",
-    }
-
-
 @router.post("/api/v1/batch_simulations")
 async def batch_simulations(data: BatchSimulationRequest):
     try:

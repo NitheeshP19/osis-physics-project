@@ -1,35 +1,6 @@
-const API_BASE_STORAGE_KEY = "osis.apiBaseUrl";
-
-function normalizeApiBaseUrl(value) {
-    let trimmed = String(value ?? "").trim();
-    if (!trimmed) return "";
-    if (!/^https?:\/\//i.test(trimmed) && /^(localhost|\d{1,3}(?:\.\d{1,3}){3}|[\w.-]+\.[a-z]{2,})(:\d+)?(\/.*)?$/i.test(trimmed)) {
-        trimmed = `http://${trimmed}`;
-    }
-    return trimmed.replace(/\/+$/, "");
-}
-
-function resolveInitialApiBaseUrl() {
-    const queryBase = normalizeApiBaseUrl(new URLSearchParams(window.location.search).get("api_base"));
-    if (queryBase) {
-        window.localStorage.setItem(API_BASE_STORAGE_KEY, queryBase);
-        return queryBase;
-    }
-
-    const globalBase = normalizeApiBaseUrl(window.__OSIS_API_BASE__);
-    if (globalBase) return globalBase;
-
-    const storedBase = normalizeApiBaseUrl(window.localStorage.getItem(API_BASE_STORAGE_KEY));
-    if (storedBase) return storedBase;
-
-    if (window.location.protocol === "file:" || window.location.port === "5501") {
-        return "http://127.0.0.1:8000";
-    }
-
-    return "";
-}
-
-let apiBaseUrl = resolveInitialApiBaseUrl();
+const BASE_URL = (window.location.protocol === "file:" || window.location.port === "5501")
+    ? "http://127.0.0.1:8000"
+    : "";
 
 const batchState = {
     enabled: false,
@@ -40,66 +11,23 @@ const batchState = {
     helperMessage: ""
 };
 
+const analysisState = {
+    basePayload: null,
+    modulation: "",
+    snrData: null,
+    berData: null,
+    comparisonData: null,
+    optimizationData: null,
+    sensitivityData: null,
+    simulationData: null
+};
+
 function getEl(id) {
     return document.getElementById(id);
 }
 
 function getApiUrl(path) {
-    return `${apiBaseUrl}${path}`;
-}
-
-function getActiveApiLabel(baseUrl = apiBaseUrl) {
-    return baseUrl || `${window.location.origin} (same origin)`;
-}
-
-function updateApiConnectionUi(state, message, displayBase = apiBaseUrl) {
-    const input = getEl("api_base_url");
-    const badge = getEl("apiStatusBadge");
-    const display = getEl("apiBaseDisplay");
-    if (!input || !badge || !display) return;
-
-    input.value = displayBase;
-    badge.dataset.state = state;
-    badge.textContent = message;
-    display.innerHTML = `<strong>Active API:</strong> ${escapeHtml(getActiveApiLabel(displayBase))}`;
-}
-
-function setApiBaseUrl(nextBaseUrl, persist = true) {
-    apiBaseUrl = normalizeApiBaseUrl(nextBaseUrl);
-
-    if (persist) {
-        if (apiBaseUrl) {
-            window.localStorage.setItem(API_BASE_STORAGE_KEY, apiBaseUrl);
-        } else {
-            window.localStorage.removeItem(API_BASE_STORAGE_KEY);
-        }
-    }
-
-    updateApiConnectionUi("checking", "API endpoint updated");
-}
-
-async function checkApiConnection(candidateBaseUrl = apiBaseUrl) {
-    const targetBaseUrl = normalizeApiBaseUrl(candidateBaseUrl);
-    updateApiConnectionUi("checking", "Checking API...", targetBaseUrl);
-
-    try {
-        const response = await fetch(`${targetBaseUrl}/api/v1/health`, {
-            method: "GET",
-            headers: { "Accept": "application/json" }
-        });
-
-        if (!response.ok) {
-            throw new Error(`Health check failed with status ${response.status}`);
-        }
-
-        const payload = await response.json();
-        updateApiConnectionUi("connected", `${payload.service || "OSIS API"} connected`, targetBaseUrl);
-        return true;
-    } catch (error) {
-        console.error(error);
-        updateApiConnectionUi("error", "API unreachable", targetBaseUrl);
-        return false;
-    }
+    return `${BASE_URL}${path}`;
 }
 
 function formatFixed(value, digits = 3, suffix = "") {
@@ -453,6 +381,12 @@ function clearBatchResults() {
     getEl("batchRankingList").innerHTML = "";
     getEl("batchSummaryBody").innerHTML = "";
     getEl("downloadBatchPdfBtn").disabled = true;
+}
+
+function setSingleResultExportEnabled(enabled) {
+    const button = getEl("downloadResultPdfBtn");
+    if (!button) return;
+    button.disabled = !enabled;
 }
 
 function renderBatchQueue() {
@@ -846,6 +780,138 @@ function downloadBatchReport() {
     doc.save(`osis-batch-simulation-report-${dateStamp}.pdf`);
 }
 
+function downloadSingleResultReport() {
+    if (!analysisState.snrData || !analysisState.berData || !analysisState.optimizationData) {
+        alert("Run a performance analysis before downloading the PDF report.");
+        return;
+    }
+
+    const jsPDFCtor = window.jspdf?.jsPDF;
+    if (!jsPDFCtor) {
+        alert("jsPDF is unavailable in this browser session.");
+        return;
+    }
+
+    const doc = new jsPDFCtor({ orientation: "landscape", unit: "pt", format: "a4" });
+    if (typeof doc.autoTable !== "function") {
+        alert("jsPDF-AutoTable is unavailable in this browser session.");
+        return;
+    }
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const generatedAt = new Date().toLocaleString();
+    const recommendations = analysisState.optimizationData.top_recommendations || [];
+    const base = analysisState.basePayload || {};
+    const topRecommendation = recommendations[0] || null;
+    const sensitivityRows = (analysisState.sensitivityData?.ranked_sensitivity || []).slice(0, 5).map((item) => [
+        item.parameter,
+        formatFixed(item.normalized_sensitivity, 4)
+    ]);
+
+    doc.setFillColor(7, 10, 26);
+    doc.rect(0, 0, pageWidth, 88, "F");
+    doc.setTextColor(238, 242, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("OSIS Optimization Results Report", 40, 42);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(185, 194, 234);
+    doc.text(`Generated: ${generatedAt}`, 40, 62);
+    doc.text(`Modulation: ${analysisState.modulation || "--"}`, 40, 78);
+
+    doc.setTextColor(31, 41, 55);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.text("Current Result Summary", 40, 118);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text(`Physics SNR: ${formatFixed(analysisState.snrData.physics_snr_db, 3)} dB`, 40, 140);
+    doc.text(`Hybrid SNR: ${formatFixed(analysisState.snrData.predicted_snr_db, 3)} dB`, 250, 140);
+    doc.text(`Estimated BER: ${formatExponential(analysisState.berData.estimated_ber, 3)}`, 460, 140);
+    doc.text(`SNR Gain: ${formatFixed(analysisState.comparisonData?.snr_gain_over_analytical_db, 3)} dB`, 650, 140);
+
+    if (topRecommendation) {
+        const objective = topRecommendation.objective_score ?? calculateOptimizationScore(topRecommendation.predicted_snr_db, topRecommendation.estimated_ber);
+        const conclusion = `Rank 1 recommendation favors NA ${formatFixed(topRecommendation.numerical_aperture ?? base.numerical_aperture, 3)}, track pitch ${formatFixed(topRecommendation.track_pitch_nm ?? base.track_pitch_nm, 0)} nm, and temperature ${formatFixed(topRecommendation.temperature_c ?? base.temperature_c, 1)} C because it delivered the strongest Hybrid SNR / BER optimization score of ${formatFixed(objective, 3)}.`;
+        const conclusionLines = doc.splitTextToSize(conclusion, pageWidth - 110);
+        const boxHeight = 40 + (conclusionLines.length * 14);
+        doc.setFillColor(245, 248, 255);
+        doc.setDrawColor(210, 220, 236);
+        doc.roundedRect(36, 158, pageWidth - 72, boxHeight, 12, 12, "FD");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text("Optimization Conclusion", 52, 181);
+        doc.setFont("helvetica", "normal");
+        doc.text(conclusionLines, 52, 199);
+
+        doc.autoTable({
+            startY: 158 + boxHeight + 18,
+            head: [[
+                "Rank",
+                "NA",
+                "Track Pitch (nm)",
+                "Temp (C)",
+                "Humidity (%)",
+                "Hybrid SNR (dB)",
+                "BER",
+                "Score"
+            ]],
+            body: recommendations.map((row, index) => [
+                index + 1,
+                formatFixed(row.numerical_aperture ?? base.numerical_aperture, 3),
+                formatFixed(row.track_pitch_nm ?? base.track_pitch_nm, 0),
+                formatFixed(row.temperature_c ?? base.temperature_c, 1),
+                formatFixed(row.relative_humidity ?? base.relative_humidity, 1),
+                formatFixed(row.predicted_snr_db, 3),
+                formatExponential(row.estimated_ber, 3),
+                formatFixed(row.objective_score ?? calculateOptimizationScore(row.predicted_snr_db, row.estimated_ber), 3)
+            ]),
+            theme: "grid",
+            styles: {
+                fontSize: 9,
+                cellPadding: 6,
+                textColor: [31, 41, 55],
+                lineColor: [214, 223, 239]
+            },
+            headStyles: {
+                fillColor: [10, 16, 48],
+                textColor: [238, 242, 255],
+                fontStyle: "bold"
+            },
+            didParseCell(data) {
+                if (data.section === "body" && data.row.index === 0) {
+                    data.cell.styles.fillColor = [255, 248, 220];
+                    data.cell.styles.fontStyle = "bold";
+                }
+            }
+        });
+    }
+
+    if (sensitivityRows.length) {
+        doc.autoTable({
+            startY: (doc.lastAutoTable?.finalY || 240) + 22,
+            head: [["Sensitivity Parameter", "Normalized Sensitivity"]],
+            body: sensitivityRows,
+            theme: "grid",
+            styles: {
+                fontSize: 9,
+                cellPadding: 6,
+                textColor: [31, 41, 55],
+                lineColor: [214, 223, 239]
+            },
+            headStyles: {
+                fillColor: [24, 39, 78],
+                textColor: [238, 242, 255],
+                fontStyle: "bold"
+            }
+        });
+    }
+
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    doc.save(`osis-optimization-results-${dateStamp}.pdf`);
+}
+
 function resetBatchWorkflow(keepMode) {
     batchState.batchConfigs = [];
     batchState.rankedResults = [];
@@ -894,6 +960,15 @@ async function runSingleAnalysis() {
             })
         ]);
 
+        analysisState.basePayload = basePayload;
+        analysisState.modulation = modulation;
+        analysisState.snrData = snrData;
+        analysisState.berData = berData;
+        analysisState.comparisonData = cmpData;
+        analysisState.optimizationData = optData;
+        analysisState.sensitivityData = sensData;
+        analysisState.simulationData = simData;
+
         updateMetricCards(snrData, berData, cmpData);
         renderOptimizationTable(optData.top_recommendations || []);
         renderSensitivityList(sensData.ranked_sensitivity || []);
@@ -911,6 +986,7 @@ async function runSingleAnalysis() {
 
         const resultDiv = getEl("result");
         resultDiv.style.display = "block";
+        setSingleResultExportEnabled(true);
         scrollToElement(resultDiv);
     } catch (error) {
         console.error(error);
@@ -1031,26 +1107,10 @@ calculatePhysics();
 applySweepDefaults();
 clearBatchResults();
 updateBatchUi();
-updateApiConnectionUi("checking", "Resolving API...");
+setSingleResultExportEnabled(false);
 
 getEl("batch_mode").addEventListener("change", (e) => {
     resetBatchWorkflow(e.target.checked);
-});
-
-getEl("saveApiBaseBtn").addEventListener("click", async () => {
-    setApiBaseUrl(getEl("api_base_url").value);
-    const connected = await checkApiConnection();
-    if (!connected) {
-        alert("The API base URL was saved, but the backend did not respond to the health check.");
-    }
-});
-
-getEl("testApiConnectionBtn").addEventListener("click", async () => {
-    const connected = await checkApiConnection(getEl("api_base_url").value);
-    if (!connected) {
-        alert("Unable to reach the OSIS API with the current endpoint.");
-        updateApiConnectionUi("error", "API unreachable");
-    }
 });
 
 getEl("batch_count").addEventListener("change", () => {
@@ -1072,6 +1132,7 @@ getEl("resetBatchBtn").addEventListener("click", () => {
     resetBatchWorkflow(batchState.enabled);
 });
 
+getEl("downloadResultPdfBtn").addEventListener("click", downloadSingleResultReport);
 getEl("downloadBatchPdfBtn").addEventListener("click", downloadBatchReport);
 
 getEl("osisForm").addEventListener("submit", async (e) => {
@@ -1084,8 +1145,6 @@ getEl("osisForm").addEventListener("submit", async (e) => {
 
     await runSingleAnalysis();
 });
-
-checkApiConnection();
 
 // ================================================================
 // PLATFORM SIMULATION DASHBOARD
