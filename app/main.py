@@ -1,5 +1,6 @@
 # app/main.py
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -11,8 +12,17 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    logger.info("Starting up FastAPI service...")
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    registry.load_models(base_dir)
+    yield
+
+
 # Initialize FastAPI App
-app = FastAPI(title="OSIS Hybrid Simulation Platform", version="2.0")
+app = FastAPI(title="OSIS Hybrid Simulation Platform", version="2.0", lifespan=lifespan)
 
 # Security Headers & CORS for Render Deployment
 app.add_middleware(
@@ -22,13 +32,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Startup Hook (Preload ML Models Globally)
-@app.on_event("startup")
-def startup_event():
-    logger.info("Starting up FastAPI service...")
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # points to c:\Users\dell\Documents\physics
-    registry.load_models(base_dir)
 
 # Static file routing
 static_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
