@@ -1,4 +1,7 @@
-const BASE_URL = (window.location.protocol === "file:" || window.location.port === "5501")
+const isLocalFile = window.location.protocol === "file:";
+const isLocalHost = ["127.0.0.1", "localhost"].includes(window.location.hostname);
+const isBackendOrigin = isLocalHost && window.location.port === "8000";
+const BASE_URL = (isLocalFile || (isLocalHost && !isBackendOrigin))
     ? "http://127.0.0.1:8000"
     : "";
 
@@ -28,6 +31,81 @@ function getEl(id) {
 
 function getApiUrl(path) {
     return `${BASE_URL}${path}`;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function formatClientError(error) {
+    const rawMessage = String(error?.message || "Unknown error");
+    const compactMessage = rawMessage.replace(/\s+/g, " ").trim();
+
+    if (/Failed to fetch|NetworkError|Load failed|timed out|aborted|ECONNREFUSED|ConnectionRefused/i.test(compactMessage)) {
+        return `Could not reach the backend at http://127.0.0.1:8000. Start the FastAPI server, wait for it to finish loading the models, and try again.`;
+    }
+
+    if (/Chart\.js did not load/i.test(compactMessage)) {
+        return "Analysis completed, but Chart.js did not load, so the graphs could not be drawn.";
+    }
+
+    return `Analysis failed: ${compactMessage}`;
+}
+
+async function fetchWithRetry(url, options = {}, config = {}) {
+    const {
+        attempts = 4,
+        retryDelayMs = 750,
+        timeoutMs = 30000
+    } = config;
+
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+        const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+        const timeoutId = controller
+            ? window.setTimeout(() => controller.abort(), timeoutMs)
+            : null;
+
+        try {
+            const response = await fetch(url, {
+                ...options,
+                signal: controller?.signal
+            });
+            return response;
+        } catch (error) {
+            lastError = error;
+            const isRetryable =
+                error?.name === "AbortError" ||
+                /Failed to fetch|NetworkError|Load failed|fetch/i.test(String(error?.message || ""));
+
+            if (!isRetryable || attempt === attempts) {
+                throw error;
+            }
+
+            await sleep(retryDelayMs * attempt);
+        } finally {
+            if (timeoutId !== null) {
+                window.clearTimeout(timeoutId);
+            }
+        }
+    }
+
+    throw lastError || new Error("Request failed.");
+}
+
+async function ensureBackendReady() {
+    if (!BASE_URL) return;
+
+    const response = await fetchWithRetry(getApiUrl("/"), { method: "GET" }, {
+        attempts: 6,
+        retryDelayMs: 700,
+        timeoutMs: 8000
+    });
+
+    if (!response.ok) {
+        throw new Error(`Backend warm-up check failed with status ${response.status}.`);
+    }
 }
 
 function formatFixed(value, digits = 3, suffix = "") {
@@ -123,10 +201,14 @@ function buildPayload() {
 }
 
 async function postJson(url, payload) {
-    const response = await fetch(getApiUrl(url), {
+    const response = await fetchWithRetry(getApiUrl(url), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
+    }, {
+        attempts: 4,
+        retryDelayMs: 700,
+        timeoutMs: 30000
     });
 
     if (!response.ok) {
@@ -142,6 +224,9 @@ let simulationChart = null;
 function renderSensitivitySweep(simFrames) {
     const chartEl = getEl("snrChart");
     if (!chartEl) return;
+    if (typeof Chart === "undefined") {
+        throw new Error("Chart.js did not load");
+    }
 
     if (snrChart) {
         snrChart.destroy();
@@ -150,8 +235,17 @@ function renderSensitivitySweep(simFrames) {
 
     if (!Array.isArray(simFrames) || simFrames.length === 0) return;
 
-    const labels = simFrames.map(f => Number(f.value).toFixed(3));
-    const snrValues = simFrames.map(f => Number(f.predicted_snr_db).toFixed(3));
+    const frames = simFrames
+        .map(frame => ({
+            value: Number(frame.value),
+            predicted_snr_db: Number(frame.predicted_snr_db)
+        }))
+        .filter(frame => Number.isFinite(frame.value) && Number.isFinite(frame.predicted_snr_db));
+
+    if (!frames.length) return;
+
+    const labels = frames.map(frame => frame.value.toFixed(3));
+    const snrValues = frames.map(frame => frame.predicted_snr_db);
     const ctx = chartEl.getContext("2d");
 
     snrChart = new Chart(ctx, {
@@ -182,6 +276,9 @@ function renderSensitivitySweep(simFrames) {
 function renderSimulationChart(simFrames, param) {
     const chartEl = getEl("simulationChart");
     if (!chartEl) return;
+    if (typeof Chart === "undefined") {
+        throw new Error("Chart.js did not load");
+    }
 
     if (simulationChart) {
         simulationChart.destroy();
@@ -190,9 +287,23 @@ function renderSimulationChart(simFrames, param) {
 
     if (!Array.isArray(simFrames) || simFrames.length === 0) return;
 
-    const labels = simFrames.map(f => Number(f.value).toFixed(3));
-    const snr = simFrames.map(f => f.predicted_snr_db);
-    const ber = simFrames.map(f => f.estimated_ber);
+    const frames = simFrames
+        .map(frame => ({
+            value: Number(frame.value),
+            predicted_snr_db: Number(frame.predicted_snr_db),
+            estimated_ber: Math.max(Number(frame.estimated_ber), 1e-15)
+        }))
+        .filter(frame =>
+            Number.isFinite(frame.value) &&
+            Number.isFinite(frame.predicted_snr_db) &&
+            Number.isFinite(frame.estimated_ber)
+        );
+
+    if (!frames.length) return;
+
+    const labels = frames.map(frame => frame.value.toFixed(3));
+    const snr = frames.map(frame => frame.predicted_snr_db);
+    const ber = frames.map(frame => frame.estimated_ber);
     const ctx = chartEl.getContext("2d");
 
     simulationChart = new Chart(ctx, {
@@ -330,6 +441,15 @@ function renderComparisonText(cmpData) {
 
     getEl("comparisonText").textContent =
         `Analytical SNR: ${formatFixed(cmpData.analytical_physics_snr_db, 3)} dB | Hybrid SNR: ${formatFixed(cmpData.ml_hybrid_snr_db, 3)} dB | BER Reduction Ratio: ${formatFixed(cmpData.ber_reduction_ratio, 3)} | ${measuredLine}`;
+}
+
+function tryRender(renderFn, label, warnings) {
+    try {
+        renderFn();
+    } catch (error) {
+        console.error(`${label} failed`, error);
+        warnings.push(`${label}: ${error.message}`);
+    }
 }
 
 function getPrimarySubmitButton() {
@@ -929,6 +1049,8 @@ async function runSingleAnalysis() {
     btn.disabled = true;
 
     try {
+        await ensureBackendReady();
+
         const basePayload = buildPayload();
         const modulation = getEl("modulation").value;
         const measuredInput = getEl("measured_snr").value.trim();
@@ -969,6 +1091,8 @@ async function runSingleAnalysis() {
         analysisState.sensitivityData = sensData;
         analysisState.simulationData = simData;
 
+        const renderWarnings = [];
+
         updateMetricCards(snrData, berData, cmpData);
         renderOptimizationTable(optData.top_recommendations || []);
         renderSensitivityList(sensData.ranked_sensitivity || []);
@@ -976,12 +1100,15 @@ async function runSingleAnalysis() {
         renderComparisonText(cmpData);
 
         const frames = (simData && simData.frames) ? simData.frames : [];
-        renderSensitivitySweep(frames);
-        renderSimulationChart(frames, sweepParameter);
+        tryRender(() => renderSensitivitySweep(frames), "Sensitivity sweep chart", renderWarnings);
+        tryRender(() => renderSimulationChart(frames, sweepParameter), "Simulation dashboard chart", renderWarnings);
 
         const simMeta = getEl("simMeta");
         if (simMeta) {
-            simMeta.textContent = `${frames.length} frames generated for ${sweepParameter} sweep from ${simStart} to ${simEnd}.`;
+            const baseMessage = `${frames.length} frames generated for ${sweepParameter} sweep from ${simStart} to ${simEnd}.`;
+            simMeta.textContent = renderWarnings.length
+                ? `${baseMessage} Some visuals could not be rendered: ${renderWarnings.join(" | ")}`
+                : baseMessage;
         }
 
         const resultDiv = getEl("result");
@@ -990,7 +1117,7 @@ async function runSingleAnalysis() {
         scrollToElement(resultDiv);
     } catch (error) {
         console.error(error);
-        alert("Analysis failed. Ensure backend is running and inputs are valid.");
+        alert(formatClientError(error));
     } finally {
         btn.textContent = originalText;
         btn.disabled = false;

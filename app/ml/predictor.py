@@ -6,6 +6,32 @@ from typing import Dict, Any, List
 from app.utils.constants import K_BOLTZMANN
 from app.ml.model_loader import registry
 
+FEATURE_LABELS = {
+    "laser_wavelength_nm": "Laser wavelength",
+    "numerical_aperture": "Numerical aperture",
+    "spot_size_nm": "Spot size",
+    "track_pitch_nm": "Track pitch",
+    "layer_count": "Layer count",
+    "layer_spacing_nm": "Layer spacing",
+    "isi_factor": "ISI factor",
+    "crosstalk_factor": "Crosstalk factor",
+    "thermal_conductivity_w_mk": "Thermal conductivity",
+    "activation_energy_ev": "Activation energy",
+    "temperature_c": "Temperature",
+    "relative_humidity": "Relative humidity",
+    "prml_enabled": "PRML enabled",
+    "ctc_enabled": "CTC enabled",
+    "thermal_factor": "Thermal factor",
+    "physics_snr_db": "Physics SNR baseline",
+    "NA_sq": "NA squared",
+    "wavelength_div_NA": "Wavelength / NA",
+    "spot_div_pitch": "Spot size / track pitch",
+    "temp_x_humidity": "Temperature x humidity",
+    "recording_material_GST_HTL": "Material: GST_HTL",
+    "recording_material_MDISC": "Material: MDISC",
+    "reflectivity": "Reflectivity",
+}
+
 def calculate_physics_snr(wavelength: float, NA: float, isi: float, crosstalk: float, thermal_factor: float) -> float:
     """Deterministic Physics Baseline SNR."""
     return (85 + 30 * NA - 0.02 * wavelength - 15 * isi - 10 * crosstalk + 5 * thermal_factor)
@@ -65,7 +91,7 @@ def safe_feature_pipeline(input_dict: Dict[str, Any]) -> pd.DataFrame:
 def predict_snr_ber(input_dict: Dict[str, Any], modulation: str = "OOK-NRZ") -> Dict[str, Any]:
     """Generates the main ML output using global models."""
     try:
-        df, physics_snr = safe_feature_pipeline(input_dict)
+        df, physics_snr = safe_feature_pipeline(dict(input_dict))
         
         ml_residual = float(registry.model.predict(df)[0])
         final_snr = float(physics_snr + ml_residual)
@@ -79,3 +105,66 @@ def predict_snr_ber(input_dict: Dict[str, Any], modulation: str = "OOK-NRZ") -> 
         }
     except Exception as e:
         raise ValueError(f"Feature pipeline or prediction failed: {str(e)}")
+
+
+def format_feature_label(feature_name: str) -> str:
+    if feature_name in FEATURE_LABELS:
+        return FEATURE_LABELS[feature_name]
+    return feature_name.replace("_", " ").strip().title()
+
+
+def predict_snr_interval(input_dict: Dict[str, Any]) -> Dict[str, float]:
+    """Returns a prediction interval using the pre-trained lower/upper models."""
+    try:
+        df, physics_snr = safe_feature_pipeline(dict(input_dict))
+        default_residual = float(registry.model.predict(df)[0])
+        lower_residual = float(registry.model_lower.predict(df)[0]) if registry.model_lower is not None else default_residual
+        upper_residual = float(registry.model_upper.predict(df)[0]) if registry.model_upper is not None else default_residual
+
+        lower_bound = physics_snr + min(lower_residual, upper_residual)
+        upper_bound = physics_snr + max(lower_residual, upper_residual)
+
+        return {
+            "snr_lower_bound_db": float(lower_bound),
+            "snr_upper_bound_db": float(upper_bound),
+        }
+    except Exception as e:
+        raise ValueError(f"Prediction interval failed: {str(e)}")
+
+
+def explain_prediction(input_dict: Dict[str, Any], max_features: int = 5) -> List[Dict[str, Any]]:
+    """Returns the strongest SHAP feature contributions for a single prediction."""
+    try:
+        if registry.explainer is None:
+            return []
+
+        df, _ = safe_feature_pipeline(dict(input_dict))
+        shap_values = registry.explainer.shap_values(df)
+
+        if isinstance(shap_values, list):
+            shap_values = shap_values[0]
+
+        if hasattr(shap_values, "values"):
+            shap_array = np.asarray(shap_values.values, dtype=float)
+        else:
+            shap_array = np.asarray(shap_values, dtype=float)
+
+        shap_row = shap_array if shap_array.ndim == 1 else shap_array[0]
+        explanations = []
+
+        for feature_name, impact in zip(df.columns, shap_row):
+            impact_value = float(impact)
+            if not np.isfinite(impact_value) or abs(impact_value) < 1e-9:
+                continue
+
+            explanations.append(
+                {
+                    "feature": format_feature_label(feature_name),
+                    "impact": impact_value,
+                }
+            )
+
+        explanations.sort(key=lambda item: abs(item["impact"]), reverse=True)
+        return explanations[:max_features]
+    except Exception:
+        return []
