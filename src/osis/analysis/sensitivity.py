@@ -205,6 +205,10 @@ def rank_parameters_by_influence(
     list[tuple[str, float]]
         List of (parameter_name, absolute_value) sorted descending by importance.
     """
+    valid_metrics = {"delta_output", "gradient", "elasticity"}
+    if metric not in valid_metrics:
+        raise ValueError(f"metric must be one of {valid_metrics}, got '{metric}'")
+
     ranked = []
     for param, metrics in sensitivity_results.items():
         val = metrics.get(metric, 0.0)
@@ -213,3 +217,4 @@ def rank_parameters_by_influence(
 
     ranked.sort(key=lambda item: item[1], reverse=True)
     return ranked
+

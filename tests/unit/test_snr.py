@@ -63,3 +63,21 @@ class TestSNRMetrics:
 
         with pytest.raises(ValueError):
             photon_energy_j(-500e-9)
+
+    def test_snr_edge_cases_and_q_factor(self) -> None:
+        """Verify edge cases for negative signal power, q-factor and invalid modulation."""
+        from osis.physics.snr import q_factor_from_cnr_linear
+
+        with pytest.raises(ValueError):
+            cnr_db(-1.0, 1.0)
+
+        with pytest.raises(NotImplementedError):
+            ber_from_cnr(20.0, modulation="BPSK")
+
+        with pytest.raises(ValueError):
+            q_factor_from_cnr_linear(-1.0)
+
+        # Q-factor at 20 dB (CNR_linear = 100) -> sqrt(100) / 2 = 5.0
+        q = q_factor_from_cnr(20.0)
+        assert pytest.approx(q) == 5.0
+

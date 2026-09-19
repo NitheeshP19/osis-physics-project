@@ -116,3 +116,21 @@ class TestTMMReflectance:
         expected = ((n0 - n_sub) / (n0 + n_sub)) ** 2
         r = compute_stack_reflectance(500e-9, [], n_incident=n0, n_substrate=n_sub + 0j)
         assert pytest.approx(r, rel=1e-4) == expected
+
+    def test_spectral_reflectance_and_rt_validation(self) -> None:
+        """Verify spectral reflectance array computation and compute_stack_rt validation."""
+        from osis.physics.tmm import compute_stack_rt, compute_stack_reflectance_spectrum
+
+        valid_layer = ThinFilmLayer("Dielectric", 50e-9, 2.0, 0.0)
+
+        # Invalid wavelength in compute_stack_rt
+        with pytest.raises(ValueError):
+            compute_stack_rt(-400e-9, [valid_layer])
+
+        # Array of wavelengths
+        wls = np.linspace(400e-9, 700e-9, 5)
+        spec = compute_stack_reflectance_spectrum(wls, [valid_layer])
+        assert len(spec) == 5
+        assert np.all((spec >= 0.0) & (spec <= 1.0))
+
+

@@ -83,3 +83,31 @@ class TestAnalysisModules:
         assert len(ranked) == 3
         # Check sorting: first element has largest absolute swing
         assert ranked[0][1] >= ranked[1][1] >= ranked[2][1]
+
+    def test_analysis_edge_cases_and_error_handling(self) -> None:
+        """Verify error handling in sweep and sensitivity analysis."""
+        cfg = BluRayConfig()
+
+        # Sweeping an invalid value (e.g., negative wavelength) records error row
+        results = parameter_sweep(cfg, "wavelength_m", [-405e-9, 405e-9])
+        assert len(results) == 2
+        assert "error" in results[0]
+        assert np.isnan(results[0]["cnr_db"])
+        assert not np.isnan(results[1]["cnr_db"])
+
+        # Invalid parameter in sensitivity raises AttributeError
+        with pytest.raises(AttributeError):
+            one_at_a_time_sensitivity(cfg, parameters=["invalid_param"])
+
+        # Invalid output key raises KeyError
+        with pytest.raises(KeyError):
+            one_at_a_time_sensitivity(cfg, output_key="nonexistent_key")
+
+        # Large delta_fraction guards against negative values (val0 * 1e-3)
+        sens = one_at_a_time_sensitivity(cfg, parameters=["laser_power_w"], delta_fraction=0.999)
+        assert "laser_power_w" in sens
+
+        # Invalid metric in rank_parameters_by_influence raises ValueError
+        with pytest.raises(ValueError):
+            rank_parameters_by_influence(sens, metric="invalid_metric")
+

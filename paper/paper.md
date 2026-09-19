@@ -33,7 +33,9 @@ No existing open-source Python library provides an end-to-end, physically ground
 
 # Physical Model and Architecture
 
-The OSIS simulation pipeline couples four sequential layers:
+The OSIS simulation pipeline couples four sequential layers (\autoref{fig:pipeline}):
+
+![The OSIS simulation architecture: four-stage physical model chaining thin-film matrix optics, scalar diffraction and optical transfer function, optoelectronic signal conversion, and additive physical noise into Carrier-to-Noise Ratio (CNR) and Bit Error Rate (BER) metrics.\label{fig:pipeline}](figure1_pipeline.png)
 
 **1. Multilayer Thin-Film Reflectance (Abelès TMM).**
 The reflectance of the disc recording stack is computed using the standard 2×2 characteristic matrix (Abelès) formalism [@Born2019, §1.6]:
@@ -86,9 +88,12 @@ The following CNR values are produced by the OSIS physics engine for the three s
 | DVD-RW | 650 | 0.60 | 661 | 0.209 | 26.19 |
 | Blu-ray BD-RE | 405 | 0.85 | 291 | 0.105 | 16.79 |
 
-The MTF-limited CNR decrease from CD to Blu-ray is physically consistent with the increasing spatial frequency challenge at smaller minimum mark lengths. Sensitivity analysis (OAT, ±5% perturbation) identifies numerical aperture as the dominant influence on CNR (elasticity $\approx +1.37$), consistent with established optical storage theory [@Bouwhuis1985].
+![Quantitative OSIS model outputs across standardized disc configurations: (a) diffraction-limited focal spot intensity profiles (Airy patterns); (b) incoherent Modulation Transfer Function (MTF) versus spatial frequency up to optical cutoff; (c) One-At-a-Time sensitivity analysis of Blu-ray BD-RE baseline showing parameter elasticities (% $\Delta\text{CNR}$ per 1% parameter shift).\label{fig:disc_comparison}](figure2_disc_comparison.png)
+
+The MTF-limited CNR decrease from CD to Blu-ray (\autoref{fig:disc_comparison}a, b) is physically consistent with the increasing spatial frequency challenge at smaller minimum mark lengths. Sensitivity analysis (OAT, ±5% perturbation) identifies numerical aperture as the dominant influence on CNR (elasticity $\approx +3.11$, \autoref{fig:disc_comparison}c), consistent with established optical storage theory [@Bouwhuis1985].
 
 A gradient-boosted machine-learning surrogate trained on 5,000 OSIS physics-engine evaluations achieves RMSE = 0.168 dB and MAE = 0.123 dB on a held-out test set (R² = 0.9999), while reducing per-evaluation latency from ~0.25 ms (full physics) to ~0.05 ms (surrogate inference). The surrogate learns channel impairments not captured by the analytic model — density-dependent crosstalk, multi-layer optical attenuation, and humidity-induced dye degradation — without synthetic or circular training targets.
+
 
 # Assumptions and Limitations
 

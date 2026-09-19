@@ -94,8 +94,8 @@ def parameter_sweep(
     rows: list[dict[str, Any]] = []
 
     for v in values:
-        modified = _set_field(config, parameter, float(v))
         try:
+            modified = _set_field(config, parameter, float(v))
             result = _osis.simulate(modified, **kwargs)
         except Exception as exc:
             rows.append(
