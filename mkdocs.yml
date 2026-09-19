@@ -1,0 +1,42 @@
+site_name: OSIS Documentation
+site_description: Optical Storage Intelligence Simulator — Physics-Based Readout Channel Modeling
+site_author: Nitheesh P.
+repo_url: https://github.com/NitheeshP19/osis-physics-project
+repo_name: NitheeshP19/osis-physics-project
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - content.code.copy
+    - navigation.sections
+    - navigation.top
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Quickstart: quickstart.md
+  - Physical Model: physics.md
+  - Assumptions & Limitations: assumptions.md
+  - API Reference: api.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
+  - tables

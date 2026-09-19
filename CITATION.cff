@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use OSIS in your research, please cite it using this metadata."
+type: software
+title: "OSIS: Optical Storage Intelligence Simulator"
+version: 1.0.0
+date-released: "2026-09-19"
+abstract: >
+  A physics-based Python library for simulating the complete optical readout
+  channel of phase-change optical storage discs (CD, DVD, Blu-ray). Implements
+  the Abelès Transfer Matrix Method for thin-film reflectance, Rayleigh scalar
+  diffraction spot sizing, incoherent MTF modulation, optoelectronic signal
+  conversion, and a three-component physical noise model (shot, RIN, thermal).
+  Produces CNR and BER as primary outputs. Includes parameter sweep,
+  One-At-a-Time sensitivity analysis, and an optional ML surrogate component.
+authors:
+  - family-names: "P."
+    given-names: "Nitheesh"
+    email: "nitheeshengineer@gmail.com"
+license: MIT
+repository-code: "https://github.com/NitheeshP19/osis-physics-project"
+url: "https://github.com/NitheeshP19/osis-physics-project"
+keywords:
+  - optical storage
+  - thin-film optics
+  - transfer matrix method
+  - CD DVD Blu-ray
+  - readout simulation
+  - signal-to-noise ratio
+  - carrier-to-noise ratio
+  - machine learning surrogate
+  - scientific Python
+preferred-citation:
+  type: article
+  journal: "Journal of Open Source Software"
+  title: "OSIS: Optical Storage Intelligence Simulator — A Physics-Based Python Framework for Optical Disc Readout Channel Modeling"
+  authors:
+    - family-names: "P."
+      given-names: "Nitheesh"
+  year: 2026

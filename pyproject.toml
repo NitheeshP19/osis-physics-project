@@ -1,0 +1,100 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "osis"
+version = "1.0.0"
+description = "Optical Storage Intelligence Simulator — a Python library for optical-storage readout simulation"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Nitheesh P.", email = "nitheeshengineer@gmail.com" }
+]
+keywords = [
+    "optical storage",
+    "Blu-ray",
+    "DVD",
+    "CD",
+    "thin film optics",
+    "transfer matrix method",
+    "readout simulation",
+    "SNR",
+    "optical disc"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "pandas>=2.0",
+]
+
+[project.optional-dependencies]
+web = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "pydantic>=2.0",
+    "joblib>=1.3",
+    "shap>=0.44",
+]
+ml = [
+    "scikit-learn>=1.3",
+    "joblib>=1.3",
+    "optuna>=3.5",
+    "shap>=0.44",
+]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.3",
+    "mypy>=1.8",
+]
+docs = [
+    "mkdocs>=1.5",
+    "mkdocs-material>=9.4",
+    "mkdocstrings[python]>=0.24",
+]
+all = [
+    "osis[web,ml,dev,docs]",
+]
+
+[project.urls]
+Homepage = "https://github.com/NitheeshP19/osis-physics-project"
+Repository = "https://github.com/NitheeshP19/osis-physics-project"
+"Bug Tracker" = "https://github.com/NitheeshP19/osis-physics-project/issues"
+Documentation = "https://github.com/NitheeshP19/osis-physics-project"
+
+[project.scripts]
+osis = "osis.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/osis"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--tb=short -q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
+ignore = ["N806"]   # allow lowercase in physics equations (e.g., k, n)
+
+[tool.coverage.run]
+source = ["src/osis"]
+omit = ["tests/*"]
