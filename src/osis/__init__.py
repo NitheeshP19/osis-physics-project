@@ -148,10 +148,12 @@ def simulate(config: "DiscConfig", *, mark_length_m: float | None = None) -> dic
         "mtf": mtf_val,
         "r_land": r_land,
         "r_mark": r_mark,
+        "contrast": abs(r_land - r_mark),
         "signal_power_w": sig,
         "noise_power_w": noise,
         "config": config,
     }
+
 
 
 __all__ = [

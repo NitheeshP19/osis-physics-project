@@ -1,0 +1,206 @@
+{
+  "CD-RW": {
+    "numerical_aperture": {
+      "baseline_value": 0.45,
+      "baseline_output": 38.97665282958403,
+      "val_low": 0.4275,
+      "val_high": 0.47250000000000003,
+      "output_low": 38.25331369769449,
+      "output_high": 39.5939552555476,
+      "delta_output": 1.340641557853111,
+      "gradient": 29.792034618957995,
+      "elasticity": 0.3439601557667715
+    },
+    "laser_power_w": {
+      "baseline_value": 0.0005,
+      "baseline_output": 38.97665282958403,
+      "val_low": 0.000475,
+      "val_high": 0.000525,
+      "output_low": 38.578193435930125,
+      "output_high": 39.352769808592946,
+      "delta_output": 0.7745763726628212,
+      "gradient": 15491.527453256434,
+      "elasticity": 0.19872829410197668
+    },
+    "quantum_efficiency": {
+      "baseline_value": 0.8,
+      "baseline_output": 38.97665282958403,
+      "val_low": 0.76,
+      "val_high": 0.8400000000000001,
+      "output_low": 38.578193435930125,
+      "output_high": 39.352769808592946,
+      "delta_output": 0.7745763726628212,
+      "gradient": 9.682204658285256,
+      "elasticity": 0.19872829410197637
+    },
+    "detector_bandwidth_hz": {
+      "baseline_value": 50000000.0,
+      "baseline_output": 38.97665282958403,
+      "val_low": 47500000.0,
+      "val_high": 52500000.0,
+      "output_low": 39.19941677669555,
+      "output_high": 38.76475983888465,
+      "delta_output": -0.43465693781089954,
+      "gradient": -8.693138756217991e-08,
+      "elasticity": -0.11151725616648808
+    },
+    "load_resistance_ohm": {
+      "baseline_value": 500.0,
+      "baseline_output": 38.97665282958403,
+      "val_low": 475.0,
+      "val_high": 525.0,
+      "output_low": 38.79024139702477,
+      "output_high": 39.1524950694165,
+      "delta_output": 0.3622536723917307,
+      "gradient": 0.0072450734478346135,
+      "elasticity": 0.09294119584244369
+    },
+    "temperature_k": {
+      "baseline_value": 300.0,
+      "baseline_output": 38.97665282958403,
+      "val_low": 285.0,
+      "val_high": 315.0,
+      "output_low": 39.161476882267195,
+      "output_high": 38.799374363916485,
+      "delta_output": -0.36210251835071006,
+      "gradient": -0.01207008394502367,
+      "elasticity": -0.09290241518016325
+    }
+  },
+  "DVD-RW": {
+    "numerical_aperture": {
+      "baseline_value": 0.6,
+      "baseline_output": 26.186563791623616,
+      "val_low": 0.57,
+      "val_high": 0.63,
+      "output_low": 24.71468689580324,
+      "output_high": 27.379203898906802,
+      "delta_output": 2.664517003103562,
+      "gradient": 44.40861671839266,
+      "elasticity": 1.017513036191433
+    },
+    "laser_power_w": {
+      "baseline_value": 0.0005,
+      "baseline_output": 26.186563791623616,
+      "val_low": 0.000475,
+      "val_high": 0.000525,
+      "output_low": 25.7596548319472,
+      "output_high": 26.59153368465865,
+      "delta_output": 0.8318788527114513,
+      "gradient": 16637.577054229037,
+      "elasticity": 0.31767392596104865
+    },
+    "quantum_efficiency": {
+      "baseline_value": 0.8,
+      "baseline_output": 26.186563791623616,
+      "val_low": 0.76,
+      "val_high": 0.8400000000000001,
+      "output_low": 25.7596548319472,
+      "output_high": 26.59153368465865,
+      "delta_output": 0.8318788527114513,
+      "gradient": 10.398485658893133,
+      "elasticity": 0.3176739259610482
+    },
+    "detector_bandwidth_hz": {
+      "baseline_value": 100000000.0,
+      "baseline_output": 26.186563791623616,
+      "val_low": 95000000.0,
+      "val_high": 105000000.0,
+      "output_low": 26.40932773873514,
+      "output_high": 25.974670800924237,
+      "delta_output": -0.4346569378109031,
+      "gradient": -4.3465693781090306e-08,
+      "elasticity": -0.16598471692186595
+    },
+    "load_resistance_ohm": {
+      "baseline_value": 500.0,
+      "baseline_output": 26.186563791623616,
+      "val_low": 475.0,
+      "val_high": 525.0,
+      "output_low": 25.979768882129708,
+      "output_high": 26.38254624791422,
+      "delta_output": 0.4027773657845124,
+      "gradient": 0.008055547315690248,
+      "elasticity": 0.15381069810822226
+    },
+    "temperature_k": {
+      "baseline_value": 300.0,
+      "baseline_output": 26.186563791623616,
+      "val_low": 285.0,
+      "val_high": 315.0,
+      "output_low": 26.39258142025021,
+      "output_high": 25.989878075221668,
+      "delta_output": -0.40270334502854155,
+      "gradient": -0.013423444834284719,
+      "elasticity": -0.15378243141521136
+    }
+  },
+  "Blu-ray BD-RE": {
+    "numerical_aperture": {
+      "baseline_value": 0.85,
+      "baseline_output": 16.791191808723504,
+      "val_low": 0.8075,
+      "val_high": 0.8925,
+      "output_low": 13.781556808382398,
+      "output_high": 19.00215263383064,
+      "delta_output": 5.2205958254482425,
+      "gradient": 61.41877441703817,
+      "elasticity": 3.1091276217427257
+    },
+    "laser_power_w": {
+      "baseline_value": 0.0005,
+      "baseline_output": 16.791191808723504,
+      "val_low": 0.000475,
+      "val_high": 0.000525,
+      "output_low": 16.35896320936523,
+      "output_high": 17.201558267775546,
+      "delta_output": 0.8425950584103177,
+      "gradient": 16851.901168206365,
+      "elasticity": 0.5018077739857429
+    },
+    "quantum_efficiency": {
+      "baseline_value": 0.75,
+      "baseline_output": 16.791191808723504,
+      "val_low": 0.7125,
+      "val_high": 0.7875,
+      "output_low": 16.35896320936523,
+      "output_high": 17.201558267775543,
+      "delta_output": 0.8425950584103141,
+      "gradient": 11.234600778804195,
+      "elasticity": 0.5018077739857408
+    },
+    "detector_bandwidth_hz": {
+      "baseline_value": 200000000.0,
+      "baseline_output": 16.791191808723504,
+      "val_low": 190000000.0,
+      "val_high": 210000000.0,
+      "output_low": 17.013955755835028,
+      "output_high": 16.579298818024125,
+      "delta_output": -0.4346569378109031,
+      "gradient": -2.1732846890545153e-08,
+      "elasticity": -0.25886008733762805
+    },
+    "load_resistance_ohm": {
+      "baseline_value": 500.0,
+      "baseline_output": 16.791191808723504,
+      "val_low": 475.0,
+      "val_high": 525.0,
+      "output_low": 16.58019014987126,
+      "output_high": 16.991354281729528,
+      "delta_output": 0.4111641318582677,
+      "gradient": 0.008223282637165354,
+      "elasticity": 0.24486893875195695
+    },
+    "temperature_k": {
+      "baseline_value": 300.0,
+      "baseline_output": 16.791191808723504,
+      "val_low": 285.0,
+      "val_high": 315.0,
+      "output_low": 17.001608719294317,
+      "output_high": 16.590500274356593,
+      "delta_output": -0.41110844493772447,
+      "gradient": -0.013703614831257482,
+      "elasticity": -0.244835774387463
+    }
+  }
+}

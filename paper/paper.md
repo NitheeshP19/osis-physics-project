@@ -10,7 +10,6 @@ tags:
   - machine learning surrogate
 authors:
   - name: Nitheesh P.
-    orcid: 0000-0000-0000-0000
     affiliation: 1
 affiliations:
   - name: Independent Researcher
@@ -31,9 +30,10 @@ Optical data storage is experiencing renewed research and commercial interest dr
 
 No existing open-source Python library provides an end-to-end, physically grounded, modular optical disc readout simulation framework. OSIS fills this gap by exposing a clean, importable API — `osis.simulate(config)` — that runs the complete TMM-to-BER pipeline transparently, with all physical equations and assumptions documented and cited inline. The library is designed for researchers in optical storage physics, photonics instrumentation, and materials science who need a reproducible, auditable, and extensible computational baseline without dependency on commercial software.
 
-# Physical Model and Architecture
+# Software Design and Physical Architecture
 
-The OSIS simulation pipeline couples four sequential layers (\autoref{fig:pipeline}):
+OSIS is engineered as a modular, pure-Python library (`src/osis/`) with zero mandatory web dependencies. Immutable dataclass configurations (`DiscConfig`) define disc stacks and optical parameters. The computational engine couples four physical stages (\autoref{fig:pipeline}):
+
 
 ![The OSIS simulation architecture: four-stage physical model chaining thin-film matrix optics, scalar diffraction and optical transfer function, optoelectronic signal conversion, and additive physical noise into Carrier-to-Noise Ratio (CNR) and Bit Error Rate (BER) metrics.\label{fig:pipeline}](figure1_pipeline.png)
 
@@ -78,9 +78,9 @@ $$\mathrm{BER} = \tfrac{1}{2}\,\mathrm{erfc}\!\left(\frac{\sqrt{\mathrm{CNR}_\te
 
 OSIS was written from scratch as a research-software contribution, without being a fork of any existing software. Existing open tools such as `tmm` [@SalehTeich2019] cover thin-film reflectance in isolation, but do not couple to readout signal modeling, noise physics, or analysis frameworks. Commercial tools (Zemax, VirtualLab) support vector diffraction and full optical system modeling but are closed-source, require expensive licenses, and do not expose programmatic APIs for parameter sweep automation or ML surrogate integration. No identified open-source Python package provides the complete optical storage readout channel (TMM + MTF + noise → CNR/BER) in a single, documented, tested library.
 
-# Research Impact and Demonstrated Results
+# Research Impact Statement
 
-The following CNR values are produced by the OSIS physics engine for the three standard disc formats, evaluated using literature-sourced material parameters:
+The scientific utility and computational reproducibility of OSIS are demonstrated through an automated, end-to-end research benchmark study included in the repository (`research/run_study.py`, executable via `osis reproduce`). The study investigates how wavelength compression, numerical aperture, and minimum mark spatial frequency dictate the trade-offs between optical spot compression, MTF modulation depth, and optoelectronic Carrier-to-Noise Ratio (CNR) across the three generations of optical disc formats:
 
 | Format | $\lambda$ (nm) | NA | Spot Radius (nm) | MTF at $T_\text{min}$ | CNR (dB) |
 |:-------|:---------------|:---|:-----------------|:----------------------|:---------|
@@ -93,6 +93,7 @@ The following CNR values are produced by the OSIS physics engine for the three s
 The MTF-limited CNR decrease from CD to Blu-ray (\autoref{fig:disc_comparison}a, b) is physically consistent with the increasing spatial frequency challenge at smaller minimum mark lengths. Sensitivity analysis (OAT, ±5% perturbation) identifies numerical aperture as the dominant influence on CNR (elasticity $\approx +3.11$, \autoref{fig:disc_comparison}c), consistent with established optical storage theory [@Bouwhuis1985].
 
 A gradient-boosted machine-learning surrogate trained on 5,000 OSIS physics-engine evaluations achieves RMSE = 0.168 dB and MAE = 0.123 dB on a held-out test set (R² = 0.9999), while reducing per-evaluation latency from ~0.25 ms (full physics) to ~0.05 ms (surrogate inference). The surrogate learns channel impairments not captured by the analytic model — density-dependent crosstalk, multi-layer optical attenuation, and humidity-induced dye degradation — without synthetic or circular training targets.
+
 
 
 # Assumptions and Limitations

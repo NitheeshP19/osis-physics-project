@@ -1,0 +1,47 @@
+[
+  {
+    "format": "CD-RW",
+    "wavelength_nm": 780.0,
+    "numerical_aperture": 0.45,
+    "min_mark_length_nm": 833.0,
+    "spot_radius_nm": 1057.33,
+    "r_land_pct": 10.14,
+    "r_mark_pct": 22.34,
+    "contrast_pct": 12.2,
+    "mtf_at_tmin": 0.3689,
+    "signal_power_nw": 7.854238277084005,
+    "noise_power_nw": 0.000994119950525686,
+    "cnr_db": 38.98,
+    "ber": 0.0
+  },
+  {
+    "format": "DVD-RW",
+    "wavelength_nm": 650.0,
+    "numerical_aperture": 0.6,
+    "min_mark_length_nm": 400.0,
+    "spot_radius_nm": 660.83,
+    "r_land_pct": 13.18,
+    "r_mark_pct": 5.25,
+    "contrast_pct": 7.94,
+    "mtf_at_tmin": 0.2093,
+    "signal_power_nw": 0.7430721788352662,
+    "noise_power_nw": 0.001788029262737007,
+    "cnr_db": 26.19,
+    "ber": 1.0664116026383238e-24
+  },
+  {
+    "format": "Blu-ray BD-RE",
+    "wavelength_nm": 405.0,
+    "numerical_aperture": 0.85,
+    "min_mark_length_nm": 149.0,
+    "spot_radius_nm": 290.65,
+    "r_land_pct": 21.41,
+    "r_mark_pct": 6.35,
+    "contrast_pct": 15.06,
+    "mtf_at_tmin": 0.1045,
+    "signal_power_nw": 0.16732689389379551,
+    "noise_power_nw": 0.003503051873243646,
+    "cnr_db": 16.79,
+    "ber": 0.0002744850741362691
+  }
+]

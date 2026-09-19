@@ -1,0 +1,52 @@
+{
+  "study_title": "Simulation-Based Analysis of Optical Readout Quality Across Representative CD, DVD, and Blu-ray Configurations",
+  "research_question": "How do wavelength scaling, numerical aperture, and minimum mark spatial frequency dictate the trade-offs between optical spot compression, MTF modulation depth, and optoelectronic Carrier-to-Noise Ratio (CNR) across the three generations of optical disc formats?",
+  "formats": [
+    {
+      "name": "CD-RW",
+      "wavelength_nm": 780.0,
+      "numerical_aperture": 0.45,
+      "track_pitch_nm": 1600.0,
+      "min_mark_length_nm": 833.0,
+      "laser_power_mw": 0.5,
+      "bandwidth_mhz": 50.0,
+      "standard": "ECMA-130"
+    },
+    {
+      "name": "DVD-RW",
+      "wavelength_nm": 650.0,
+      "numerical_aperture": 0.60,
+      "track_pitch_nm": 740.0,
+      "min_mark_length_nm": 400.0,
+      "laser_power_mw": 0.5,
+      "bandwidth_mhz": 100.0,
+      "standard": "ECMA-267"
+    },
+    {
+      "name": "Blu-ray BD-RE",
+      "wavelength_nm": 405.0,
+      "numerical_aperture": 0.85,
+      "track_pitch_nm": 320.0,
+      "min_mark_length_nm": 149.0,
+      "laser_power_mw": 0.5,
+      "bandwidth_mhz": 200.0,
+      "standard": "BDA System Description Part 1"
+    }
+  ],
+  "parameter_sweeps": {
+    "na_sweep": {
+      "cd": [0.40, 0.45, 0.50],
+      "dvd": [0.55, 0.60, 0.65],
+      "bd": [0.75, 0.80, 0.85, 0.90]
+    },
+    "mark_length_sweep_steps": 25
+  },
+  "metrics": [
+    "spot_radius_nm",
+    "mtf_at_tmin",
+    "signal_power_nw",
+    "noise_power_nw",
+    "cnr_db",
+    "ber"
+  ]
+}

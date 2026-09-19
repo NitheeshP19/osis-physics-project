@@ -1,0 +1,659 @@
+{
+  "CD-RW": [
+    {
+      "mark_multiplier": 0.5,
+      "mark_length_nm": 416.5,
+      "mtf": 0.0,
+      "cnr_db": -Infinity,
+      "ber": 0.5
+    },
+    {
+      "mark_multiplier": 0.6,
+      "mark_length_nm": 499.8,
+      "mtf": 0.057,
+      "cnr_db": 22.76,
+      "ber": 3.1548917649575123e-12
+    },
+    {
+      "mark_multiplier": 0.7,
+      "mark_length_nm": 583.1,
+      "mtf": 0.1501,
+      "cnr_db": 31.17,
+      "ber": 2.145452087589967e-73
+    },
+    {
+      "mark_multiplier": 0.8,
+      "mark_length_nm": 666.4,
+      "mtf": 0.2348,
+      "cnr_db": 35.05,
+      "ber": 2.1525473799830137e-176
+    },
+    {
+      "mark_multiplier": 0.9,
+      "mark_length_nm": 749.7,
+      "mtf": 0.3074,
+      "cnr_db": 37.39,
+      "ber": 1.5931649049978514e-300
+    },
+    {
+      "mark_multiplier": 1.0,
+      "mark_length_nm": 833.0,
+      "mtf": 0.3689,
+      "cnr_db": 38.98,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 1.1,
+      "mark_length_nm": 916.3,
+      "mtf": 0.4211,
+      "cnr_db": 40.13,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 1.2,
+      "mark_length_nm": 999.6,
+      "mtf": 0.4659,
+      "cnr_db": 41.0,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 1.3,
+      "mark_length_nm": 1082.9,
+      "mtf": 0.5044,
+      "cnr_db": 41.7,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 1.4,
+      "mark_length_nm": 1166.2,
+      "mtf": 0.538,
+      "cnr_db": 42.26,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 1.5,
+      "mark_length_nm": 1249.5,
+      "mtf": 0.5675,
+      "cnr_db": 42.72,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 1.6,
+      "mark_length_nm": 1332.8,
+      "mtf": 0.5934,
+      "cnr_db": 43.11,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 1.7,
+      "mark_length_nm": 1416.1,
+      "mtf": 0.6166,
+      "cnr_db": 43.44,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 1.8,
+      "mark_length_nm": 1499.4,
+      "mtf": 0.6372,
+      "cnr_db": 43.72,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 1.9,
+      "mark_length_nm": 1582.7,
+      "mtf": 0.6558,
+      "cnr_db": 43.97,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 2.0,
+      "mark_length_nm": 1666.0,
+      "mtf": 0.6726,
+      "cnr_db": 44.19,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 2.1,
+      "mark_length_nm": 1749.3,
+      "mtf": 0.6879,
+      "cnr_db": 44.39,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 2.2,
+      "mark_length_nm": 1832.6,
+      "mtf": 0.7018,
+      "cnr_db": 44.56,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 2.3,
+      "mark_length_nm": 1915.9,
+      "mtf": 0.7145,
+      "cnr_db": 44.72,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 2.4,
+      "mark_length_nm": 1999.2,
+      "mtf": 0.7262,
+      "cnr_db": 44.86,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 2.5,
+      "mark_length_nm": 2082.5,
+      "mtf": 0.737,
+      "cnr_db": 44.99,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 2.6,
+      "mark_length_nm": 2165.8,
+      "mtf": 0.747,
+      "cnr_db": 45.11,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 2.7,
+      "mark_length_nm": 2249.1,
+      "mtf": 0.7562,
+      "cnr_db": 45.21,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 2.8,
+      "mark_length_nm": 2332.4,
+      "mtf": 0.7648,
+      "cnr_db": 45.31,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 2.9,
+      "mark_length_nm": 2415.7,
+      "mtf": 0.7728,
+      "cnr_db": 45.4,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 3.0,
+      "mark_length_nm": 2499.0,
+      "mtf": 0.7803,
+      "cnr_db": 45.48,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 3.1,
+      "mark_length_nm": 2582.3,
+      "mtf": 0.7873,
+      "cnr_db": 45.56,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 3.2,
+      "mark_length_nm": 2665.6,
+      "mtf": 0.7939,
+      "cnr_db": 45.63,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 3.3,
+      "mark_length_nm": 2748.9,
+      "mtf": 0.8001,
+      "cnr_db": 45.7,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 3.4,
+      "mark_length_nm": 2832.2,
+      "mtf": 0.806,
+      "cnr_db": 45.77,
+      "ber": 0.0
+    },
+    {
+      "mark_multiplier": 3.5,
+      "mark_length_nm": 2915.5,
+      "mtf": 0.8115,
+      "cnr_db": 45.82,
+      "ber": 0.0
+    }
+  ],
+  "DVD-RW": [
+    {
+      "mark_multiplier": 0.5,
+      "mark_length_nm": 200.0,
+      "mtf": 0.0,
+      "cnr_db": -Infinity,
+      "ber": 0.5
+    },
+    {
+      "mark_multiplier": 0.6,
+      "mark_length_nm": 240.0,
+      "mtf": 0.0,
+      "cnr_db": -Infinity,
+      "ber": 0.5
+    },
+    {
+      "mark_multiplier": 0.7,
+      "mark_length_nm": 280.0,
+      "mtf": 0.0071,
+      "cnr_db": -3.23,
+      "ber": 0.3651893896780768
+    },
+    {
+      "mark_multiplier": 0.8,
+      "mark_length_nm": 320.0,
+      "mtf": 0.0706,
+      "cnr_db": 16.75,
+      "ber": 0.00029206541526264246
+    },
+    {
+      "mark_multiplier": 0.9,
+      "mark_length_nm": 360.0,
+      "mtf": 0.1423,
+      "cnr_db": 22.84,
+      "ber": 2.0593039526597526e-12
+    },
+    {
+      "mark_multiplier": 1.0,
+      "mark_length_nm": 400.0,
+      "mtf": 0.2093,
+      "cnr_db": 26.19,
+      "ber": 1.0664116026383238e-24
+    },
+    {
+      "mark_multiplier": 1.1,
+      "mark_length_nm": 440.0,
+      "mtf": 0.2691,
+      "cnr_db": 28.37,
+      "ber": 1.555822473623478e-39
+    },
+    {
+      "mark_multiplier": 1.2,
+      "mark_length_nm": 480.0,
+      "mtf": 0.3218,
+      "cnr_db": 29.92,
+      "ber": 1.172110438136316e-55
+    },
+    {
+      "mark_multiplier": 1.3,
+      "mark_length_nm": 520.0,
+      "mtf": 0.3682,
+      "cnr_db": 31.09,
+      "ber": 3.2701066149052107e-72
+    },
+    {
+      "mark_multiplier": 1.4,
+      "mark_length_nm": 560.0,
+      "mtf": 0.4091,
+      "cnr_db": 32.01,
+      "ber": 1.1736340607720863e-88
+    },
+    {
+      "mark_multiplier": 1.5,
+      "mark_length_nm": 600.0,
+      "mtf": 0.4454,
+      "cnr_db": 32.75,
+      "ber": 1.1459706963984058e-104
+    },
+    {
+      "mark_multiplier": 1.6,
+      "mark_length_nm": 640.0,
+      "mtf": 0.4777,
+      "cnr_db": 33.36,
+      "ber": 4.6549892709610696e-120
+    },
+    {
+      "mark_multiplier": 1.7,
+      "mark_length_nm": 680.0,
+      "mtf": 0.5066,
+      "cnr_db": 33.87,
+      "ber": 9.776999078204542e-135
+    },
+    {
+      "mark_multiplier": 1.8,
+      "mark_length_nm": 720.0,
+      "mtf": 0.5326,
+      "cnr_db": 34.3,
+      "ber": 1.1584784313430224e-148
+    },
+    {
+      "mark_multiplier": 1.9,
+      "mark_length_nm": 760.0,
+      "mtf": 0.5561,
+      "cnr_db": 34.67,
+      "ber": 7.795873439011496e-162
+    },
+    {
+      "mark_multiplier": 2.0,
+      "mark_length_nm": 800.0,
+      "mtf": 0.5773,
+      "cnr_db": 35.0,
+      "ber": 2.8575398273264104e-174
+    },
+    {
+      "mark_multiplier": 2.1,
+      "mark_length_nm": 840.0,
+      "mtf": 0.5967,
+      "cnr_db": 35.29,
+      "ber": 5.3210767822511736e-186
+    },
+    {
+      "mark_multiplier": 2.2,
+      "mark_length_nm": 880.0,
+      "mtf": 0.6144,
+      "cnr_db": 35.54,
+      "ber": 4.625699349551568e-197
+    },
+    {
+      "mark_multiplier": 2.3,
+      "mark_length_nm": 920.0,
+      "mtf": 0.6307,
+      "cnr_db": 35.77,
+      "ber": 1.713888842166266e-207
+    },
+    {
+      "mark_multiplier": 2.4,
+      "mark_length_nm": 960.0,
+      "mtf": 0.6456,
+      "cnr_db": 35.97,
+      "ber": 2.4676958485065535e-217
+    },
+    {
+      "mark_multiplier": 2.5,
+      "mark_length_nm": 1000.0,
+      "mtf": 0.6594,
+      "cnr_db": 36.16,
+      "ber": 1.2611848019864405e-226
+    },
+    {
+      "mark_multiplier": 2.6,
+      "mark_length_nm": 1040.0,
+      "mtf": 0.6722,
+      "cnr_db": 36.32,
+      "ber": 2.0976220611260787e-235
+    },
+    {
+      "mark_multiplier": 2.7,
+      "mark_length_nm": 1080.0,
+      "mtf": 0.6841,
+      "cnr_db": 36.47,
+      "ber": 1.0458594495572656e-243
+    },
+    {
+      "mark_multiplier": 2.8,
+      "mark_length_nm": 1120.0,
+      "mtf": 0.6951,
+      "cnr_db": 36.61,
+      "ber": 1.4474856972010075e-251
+    },
+    {
+      "mark_multiplier": 2.9,
+      "mark_length_nm": 1160.0,
+      "mtf": 0.7055,
+      "cnr_db": 36.74,
+      "ber": 5.1768711586216804e-259
+    },
+    {
+      "mark_multiplier": 3.0,
+      "mark_length_nm": 1200.0,
+      "mtf": 0.7151,
+      "cnr_db": 36.86,
+      "ber": 4.477500818060972e-266
+    },
+    {
+      "mark_multiplier": 3.1,
+      "mark_length_nm": 1240.0,
+      "mtf": 0.7241,
+      "cnr_db": 36.97,
+      "ber": 8.808836368670533e-273
+    },
+    {
+      "mark_multiplier": 3.2,
+      "mark_length_nm": 1280.0,
+      "mtf": 0.7326,
+      "cnr_db": 37.07,
+      "ber": 3.725551095614582e-279
+    },
+    {
+      "mark_multiplier": 3.3,
+      "mark_length_nm": 1320.0,
+      "mtf": 0.7406,
+      "cnr_db": 37.16,
+      "ber": 3.2156229329962858e-285
+    },
+    {
+      "mark_multiplier": 3.4,
+      "mark_length_nm": 1360.0,
+      "mtf": 0.7481,
+      "cnr_db": 37.25,
+      "ber": 5.3994964347742796e-291
+    },
+    {
+      "mark_multiplier": 3.5,
+      "mark_length_nm": 1400.0,
+      "mtf": 0.7552,
+      "cnr_db": 37.33,
+      "ber": 1.6878080387159685e-296
+    }
+  ],
+  "Blu-ray BD-RE": [
+    {
+      "mark_multiplier": 0.5,
+      "mark_length_nm": 74.5,
+      "mtf": 0.0,
+      "cnr_db": -Infinity,
+      "ber": 0.5
+    },
+    {
+      "mark_multiplier": 0.6,
+      "mark_length_nm": 89.4,
+      "mtf": 0.0,
+      "cnr_db": -Infinity,
+      "ber": 0.5
+    },
+    {
+      "mark_multiplier": 0.7,
+      "mark_length_nm": 104.3,
+      "mtf": 0.0,
+      "cnr_db": -Infinity,
+      "ber": 0.5
+    },
+    {
+      "mark_multiplier": 0.8,
+      "mark_length_nm": 119.2,
+      "mtf": 0.0,
+      "cnr_db": -56.82,
+      "ber": 0.4997124769312222
+    },
+    {
+      "mark_multiplier": 0.9,
+      "mark_length_nm": 134.1,
+      "mtf": 0.0441,
+      "cnr_db": 9.29,
+      "ber": 0.07253259394719223
+    },
+    {
+      "mark_multiplier": 1.0,
+      "mark_length_nm": 149.0,
+      "mtf": 0.1045,
+      "cnr_db": 16.79,
+      "ber": 0.0002744850741362691
+    },
+    {
+      "mark_multiplier": 1.1,
+      "mark_length_nm": 163.9,
+      "mtf": 0.1642,
+      "cnr_db": 20.72,
+      "ber": 2.8093819736564894e-08
+    },
+    {
+      "mark_multiplier": 1.2,
+      "mark_length_nm": 178.8,
+      "mtf": 0.2195,
+      "cnr_db": 23.24,
+      "ber": 1.9486230754980345e-13
+    },
+    {
+      "mark_multiplier": 1.3,
+      "mark_length_nm": 193.7,
+      "mtf": 0.2696,
+      "cnr_db": 25.02,
+      "ber": 2.4333870507911404e-19
+    },
+    {
+      "mark_multiplier": 1.4,
+      "mark_length_nm": 208.6,
+      "mtf": 0.3147,
+      "cnr_db": 26.36,
+      "ber": 1.188597463937969e-25
+    },
+    {
+      "mark_multiplier": 1.5,
+      "mark_length_nm": 223.5,
+      "mtf": 0.3551,
+      "cnr_db": 27.41,
+      "ber": 3.9631890148082835e-32
+    },
+    {
+      "mark_multiplier": 1.6,
+      "mark_length_nm": 238.4,
+      "mtf": 0.3914,
+      "cnr_db": 28.26,
+      "ber": 1.3188775236189512e-38
+    },
+    {
+      "mark_multiplier": 1.7,
+      "mark_length_nm": 253.3,
+      "mtf": 0.4241,
+      "cnr_db": 28.96,
+      "ber": 5.623328790917096e-45
+    },
+    {
+      "mark_multiplier": 1.8,
+      "mark_length_nm": 268.2,
+      "mtf": 0.4537,
+      "cnr_db": 29.54,
+      "ber": 3.598069948800303e-51
+    },
+    {
+      "mark_multiplier": 1.9,
+      "mark_length_nm": 283.1,
+      "mtf": 0.4805,
+      "cnr_db": 30.04,
+      "ber": 3.798435081211179e-57
+    },
+    {
+      "mark_multiplier": 2.0,
+      "mark_length_nm": 298.0,
+      "mtf": 0.505,
+      "cnr_db": 30.47,
+      "ber": 6.967113230283968e-63
+    },
+    {
+      "mark_multiplier": 2.1,
+      "mark_length_nm": 312.9,
+      "mtf": 0.5273,
+      "cnr_db": 30.85,
+      "ber": 2.27126264606252e-68
+    },
+    {
+      "mark_multiplier": 2.2,
+      "mark_length_nm": 327.8,
+      "mtf": 0.5477,
+      "cnr_db": 31.18,
+      "ber": 1.3204760271617368e-73
+    },
+    {
+      "mark_multiplier": 2.3,
+      "mark_length_nm": 342.7,
+      "mtf": 0.5665,
+      "cnr_db": 31.47,
+      "ber": 1.3566435253355352e-78
+    },
+    {
+      "mark_multiplier": 2.4,
+      "mark_length_nm": 357.6,
+      "mtf": 0.5839,
+      "cnr_db": 31.73,
+      "ber": 2.4212326316026766e-83
+    },
+    {
+      "mark_multiplier": 2.5,
+      "mark_length_nm": 372.5,
+      "mtf": 0.5999,
+      "cnr_db": 31.97,
+      "ber": 7.343697153511866e-88
+    },
+    {
+      "mark_multiplier": 2.6,
+      "mark_length_nm": 387.4,
+      "mtf": 0.6148,
+      "cnr_db": 32.18,
+      "ber": 3.693290394533235e-92
+    },
+    {
+      "mark_multiplier": 2.7,
+      "mark_length_nm": 402.3,
+      "mtf": 0.6286,
+      "cnr_db": 32.38,
+      "ber": 3.0013591423275394e-96
+    },
+    {
+      "mark_multiplier": 2.8,
+      "mark_length_nm": 417.2,
+      "mtf": 0.6415,
+      "cnr_db": 32.55,
+      "ber": 3.8398004168326333e-100
+    },
+    {
+      "mark_multiplier": 2.9,
+      "mark_length_nm": 432.1,
+      "mtf": 0.6535,
+      "cnr_db": 32.71,
+      "ber": 7.537701628196243e-104
+    },
+    {
+      "mark_multiplier": 3.0,
+      "mark_length_nm": 447.0,
+      "mtf": 0.6648,
+      "cnr_db": 32.86,
+      "ber": 2.214691456674321e-107
+    },
+    {
+      "mark_multiplier": 3.1,
+      "mark_length_nm": 461.9,
+      "mtf": 0.6753,
+      "cnr_db": 33.0,
+      "ber": 9.510328245578445e-111
+    },
+    {
+      "mark_multiplier": 3.2,
+      "mark_length_nm": 476.8,
+      "mtf": 0.6853,
+      "cnr_db": 33.12,
+      "ber": 5.835395706336151e-114
+    },
+    {
+      "mark_multiplier": 3.3,
+      "mark_length_nm": 491.7,
+      "mtf": 0.6946,
+      "cnr_db": 33.24,
+      "ber": 5.008077906788597e-117
+    },
+    {
+      "mark_multiplier": 3.4,
+      "mark_length_nm": 506.6,
+      "mtf": 0.7034,
+      "cnr_db": 33.35,
+      "ber": 5.892321444847499e-120
+    },
+    {
+      "mark_multiplier": 3.5,
+      "mark_length_nm": 521.5,
+      "mtf": 0.7117,
+      "cnr_db": 33.45,
+      "ber": 9.32721278278141e-123
+    }
+  ]
+}

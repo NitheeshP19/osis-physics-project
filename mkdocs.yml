@@ -28,9 +28,15 @@ nav:
   - Home: index.md
   - Installation: installation.md
   - Quickstart: quickstart.md
+  - Core Concepts: concepts.md
   - Physical Model: physics.md
-  - Assumptions & Limitations: assumptions.md
+  - Assumptions: assumptions.md
+  - Validation: validation.md
+  - Benchmarks & Research Study: benchmarks.md
   - API Reference: api.md
+  - Examples & Tutorials: examples.md
+  - Limitations & Scope: limitations.md
+  - Contributing: contributing.md
 
 markdown_extensions:
   - admonition
