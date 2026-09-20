@@ -10,6 +10,7 @@ tags:
   - machine learning surrogate
 authors:
   - name: Nitheesh P.
+    orcid: 0009-0005-1003-3695
     affiliation: 1
 affiliations:
   - name: Independent Researcher
