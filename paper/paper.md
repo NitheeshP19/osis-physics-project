@@ -31,7 +31,7 @@ Optical data storage is experiencing renewed research and commercial interest dr
 
 No existing open-source Python library provides an end-to-end, physically grounded, modular optical disc readout simulation framework. OSIS fills this gap by exposing a clean, importable API — `osis.simulate(config)` — that runs the complete TMM-to-BER pipeline transparently, with all physical equations and assumptions documented and cited inline. The library is designed for researchers in optical storage physics, photonics instrumentation, and materials science who need a reproducible, auditable, and extensible computational baseline without dependency on commercial software.
 
-# Software Design and Physical Architecture
+# Software design
 
 OSIS is engineered as a modular, pure-Python library (`src/osis/`) with zero mandatory web dependencies. Immutable dataclass configurations (`DiscConfig`) define disc stacks and optical parameters. The computational engine couples four physical stages (\autoref{fig:pipeline}):
 
@@ -77,7 +77,15 @@ $$\mathrm{BER} = \tfrac{1}{2}\,\mathrm{erfc}\!\left(\frac{\sqrt{\mathrm{CNR}_\te
 
 # State of the Field
 
-OSIS was written from scratch as a research-software contribution, without being a fork of any existing software. Existing open tools such as `tmm` [@Byrnes2016] cover thin-film reflectance in isolation, but do not couple to readout signal modeling, noise physics, or analysis frameworks. Commercial tools (Zemax, VirtualLab) support vector diffraction and full optical system modeling but are closed-source, require expensive licenses, and do not expose programmatic APIs for parameter sweep automation or ML surrogate integration. No identified open-source Python package provides the complete optical storage readout channel (TMM + MTF + noise → CNR/BER) in a single, documented, tested library.
+OSIS is a new, independent open-source contribution and was written from scratch; it is not a fork of any existing package. Several related Python tools address overlapping sub-problems:
+
+**`tmm` [@Byrnes2016]** computes multilayer thin-film reflectance and transmission using the transfer matrix method and is the closest open tool to OSIS's first computational stage. However, `tmm` operates on a single spectral point and does not model photodetector responsivity, spatial-frequency channel effects (MTF), or noise mechanisms. It produces reflectance coefficients only, not CNR or BER, and provides no parameter-sweep or sensitivity framework. OSIS builds on the same physical formalism (Abelès 2×2 matrices) and could be used alongside `tmm` for single-layer validation, but the optical storage readout channel requires the four additional stages that `tmm` does not provide.
+
+**POPPY** is a physical optics propagation Python library developed for diffraction modeling of space telescope apertures [@perrin2012]. Its domain is two-dimensional pupil-plane wavefront propagation. It does not model thin-film disc stacks, optoelectronic signal conversion, laser noise, or storage-specific spatial-frequency channel coding. The OSIS scalar-diffraction MTF model is analytically derived for circular incoherent illumination and does not depend on 2D pupil-plane propagation.
+
+**LightPipes** provides a suite of optical wave-propagation tools (Fresnel, Fraunhofer, Zernike) for paraxial beams and is designed for laboratory optical bench simulations [@tovar1996]. It similarly does not couple to thin-film stack optics, photodetector models, noise physics, or CNR/BER estimation.
+
+The decision to write OSIS as a new package rather than extend an existing one is justified by the domain specificity of the coupling: the four-stage TMM → MTF → signal → noise → CNR/BER pipeline requires that each stage pass physically consistent intermediate quantities (reflectances into signal power, signal power into noise-limited CNR) under a unified disc configuration. Grafting this coupling onto any of the tools above would require restructuring their core APIs. OSIS instead exposes this as a single callable `osis.simulate(config)` that research users can integrate directly.
 
 # Research Impact Statement
 

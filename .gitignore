@@ -9,6 +9,24 @@ ENV/
 .python310-runtime/
 .matplotlib-py310/
 
+# Internal development / planning documents (not for public repo)
+AUDIT_*.md
+CI_*.md
+FRAMEWORK_*.md
+PLATFORM_*.md
+JOSS_FINAL_READINESS.md
+JOSS_READINESS_REPORT.md
+
+# Root-level development test scripts (not part of the test suite)
+test_api.py
+test_batch_api.py
+test_curl.py
+test_frontend_api_contract.py
+test_platform*.py
+test_speed.py
+calculate_metrics.py
+
+
 # Python cache and bytecode
 __pycache__/
 *.py[cod]
