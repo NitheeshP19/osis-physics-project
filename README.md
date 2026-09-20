@@ -79,11 +79,12 @@ An optional gradient-boosted ML surrogate is provided for rapid parameter sweeps
 - Latency: ~0.05 ms (surrogate) vs ~0.25 ms (full physics)
 
 ```python
-from ml.predict import predict_cnr
-result = predict_cnr({"wavelength_nm": 405, "numerical_aperture": 0.85, ...})
+from app.ml.predictor import predict_snr_ber
+result = predict_snr_ber({"laser_wavelength_nm": 405, "numerical_aperture": 0.85, "spot_size_nm": 291, "track_pitch_nm": 320, "layer_count": 1, "layer_spacing_nm": 0, "isi_factor": 0.9, "crosstalk_factor": 0.1, "recording_material": "GST_HTL", "thermal_conductivity_w_mk": 0.5, "activation_energy_ev": 2.2, "temperature_c": 25.0, "relative_humidity": 50.0, "prml_enabled": 1, "ctc_enabled": 1})
+print(f"Predicted SNR: {result['predicted_snr_db']:.2f} dB  BER: {result['estimated_ber']:.2e}")
 ```
 
-Requires `pip install -e ".[ml]"`. See [`ml/README.md`](ml/) for details.
+Requires `pip install -e ".[web]"`. See [`app/ml/predictor.py`](app/ml/predictor.py) for details.
 
 ## Tests
 

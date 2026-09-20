@@ -12,6 +12,11 @@ OSIS uses [Semantic Versioning](https://semver.org/).
 - Made the `dev` extra self-contained for the full API and physics test suite.
 - Rebuilt the bundled surrogate model artefacts and constrained their dependencies to versions supporting Python 3.10–3.13.
 - Made the CLI's research-study loader namespaced so it cannot be shadowed by an unrelated installed `research` package.
+- **Python 3.10 CI fix:** `osis_explainer.pkl` contains Numba-JIT compiled SHAP internals whose pickle format depends on the Python code-object layout (18 args in 3.11+, 16 in 3.10). The explainer is now loaded in an isolated `try/except` so a version mismatch degrades gracefully (feature-importance explanations become unavailable) rather than crashing app startup. All 45 tests now pass on Python 3.10 and 3.11–3.13.
+- Removed accidentally committed `.python310-runtime/` interpreter directory from version control; added to `.gitignore`.
+- Fixed incorrect `tmm` package citation in `paper/paper.md` (was citing Saleh & Teich textbook; corrected to Byrnes 2016, arXiv:1603.02720).
+- Fixed broken ML surrogate import example in `README.md`.
+
 
 ## [1.0.0] — 2026-09-19
 

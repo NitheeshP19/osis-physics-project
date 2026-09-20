@@ -76,7 +76,7 @@ $$\mathrm{BER} = \tfrac{1}{2}\,\mathrm{erfc}\!\left(\frac{\sqrt{\mathrm{CNR}_\te
 
 # State of the Field
 
-OSIS was written from scratch as a research-software contribution, without being a fork of any existing software. Existing open tools such as `tmm` [@SalehTeich2019] cover thin-film reflectance in isolation, but do not couple to readout signal modeling, noise physics, or analysis frameworks. Commercial tools (Zemax, VirtualLab) support vector diffraction and full optical system modeling but are closed-source, require expensive licenses, and do not expose programmatic APIs for parameter sweep automation or ML surrogate integration. No identified open-source Python package provides the complete optical storage readout channel (TMM + MTF + noise → CNR/BER) in a single, documented, tested library.
+OSIS was written from scratch as a research-software contribution, without being a fork of any existing software. Existing open tools such as `tmm` [@Byrnes2016] cover thin-film reflectance in isolation, but do not couple to readout signal modeling, noise physics, or analysis frameworks. Commercial tools (Zemax, VirtualLab) support vector diffraction and full optical system modeling but are closed-source, require expensive licenses, and do not expose programmatic APIs for parameter sweep automation or ML surrogate integration. No identified open-source Python package provides the complete optical storage readout channel (TMM + MTF + noise → CNR/BER) in a single, documented, tested library.
 
 # Research Impact Statement
 

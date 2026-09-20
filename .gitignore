@@ -5,6 +5,10 @@ env/
 venv/
 ENV/
 
+# Local Python runtime / interpreter directories (never commit these)
+.python310-runtime/
+.matplotlib-py310/
+
 # Python cache and bytecode
 __pycache__/
 *.py[cod]
