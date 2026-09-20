@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "osis"
-version = "1.0.0"
+version = "1.0.1"
 description = "Optical Storage Intelligence Simulator — a Python library for optical-storage readout simulation"
 readme = "README.md"
 license = { file = "LICENSE" }

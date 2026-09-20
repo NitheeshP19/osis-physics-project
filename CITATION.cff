@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use OSIS in your research, please cite it using this metadata."
 type: software
 title: "OSIS: Optical Storage Intelligence Simulator"
-version: 1.0.0
+version: 1.0.1
 date-released: "2026-09-19"
 abstract: >
   A physics-based Python library for simulating the complete optical readout

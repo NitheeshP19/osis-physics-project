@@ -6,7 +6,7 @@ OSIS uses [Semantic Versioning](https://semver.org/).
 
 ---
 
-## Unreleased
+## [1.0.1] — 2026-09-19
 
 ### Fixed
 - Made the `dev` extra self-contained for the full API and physics test suite.
@@ -16,7 +16,15 @@ OSIS uses [Semantic Versioning](https://semver.org/).
 - Removed accidentally committed `.python310-runtime/` interpreter directory from version control; added to `.gitignore`.
 - Fixed incorrect `tmm` package citation in `paper/paper.md` (was citing Saleh & Teich textbook; corrected to Byrnes 2016, arXiv:1603.02720).
 - Fixed broken ML surrogate import example in `README.md`.
+- Added ORCID `0009-0005-1003-3695` to `paper/paper.md` and `CITATION.cff`.
+- Removed stray root-level development test scripts and internal planning documents from version control.
 
+### Changed (paper)
+- Corrected JOSS paper section heading from `# Software Design and Physical Architecture` to the required `# Software design`.
+- Expanded `# State of the Field` with per-tool analysis for `tmm`, POPPY, and LightPipes; added explicit build-vs-contribute argument; removed unsupported absolute claims.
+- Added `@Byrnes2016` (arXiv:1603.02720), `@perrin2012` (POPPY/SPIE), and `@tovar1996` (LightPipes/JOSA) BibTeX entries to `paper/paper.bib`.
+
+---
 
 ## [1.0.0] — 2026-09-19
 
