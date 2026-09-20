@@ -4,9 +4,14 @@
 
 The CI `dev` extra did not contain all dependencies required by the tests it
 runs. In particular, API tests required FastAPI's test-client runtime and the
-serialized ML artefacts required SHAP and the scikit-learn 1.8 release series.
+serialized ML artefacts required SHAP and a compatible scikit-learn release.
 The CLI also used a generic `research` import that can be shadowed by a third
 party package.
+
+The first remote fix also showed that the latest scikit-learn, SHAP, and
+Matplotlib releases had dropped Python 3.10. The bundled ML artefacts were
+therefore rebuilt from the existing dataset with scikit-learn 1.7.2 and SHAP
+0.49.1, the latest compatible release series.
 
 ## Environments Tested
 
@@ -41,7 +46,8 @@ cannot access the GitHub Actions API/logs. No remote result is claimed here.
 
 ## Changes
 
-- `pyproject.toml`: declares all test runtime dependencies and pins the model-compatible scikit-learn release series.
+- `pyproject.toml`: declares all test runtime dependencies and pins Python 3.10–3.13-compatible model dependencies.
+- The bundled surrogate model, interval models, feature list, explainer, and SHAP background were regenerated from the existing dataset using scikit-learn 1.7.2 and SHAP 0.49.1.
 - `.github/workflows/ci.yml`: invokes pip and pytest via the selected matrix Python interpreter.
 - `src/osis/research.py` and `src/osis/cli.py`: use a namespaced, repository-local research loader.
 - `tests/unit/test_cli.py`: retains the CLI reproduction assertion against the namespaced loader.
@@ -50,4 +56,4 @@ cannot access the GitHub Actions API/logs. No remote result is claimed here.
 ## Remaining Risks
 
 - The eight remote GitHub Actions jobs require a push and remote workflow run before they can be reported as green.
-- The serialized surrogate artefacts intentionally require scikit-learn 1.8.x; future model retraining should update this bound and test all supported Python versions.
+- The serialized surrogate artefacts intentionally require scikit-learn 1.7.x; future model retraining should update this bound and test all supported Python versions.

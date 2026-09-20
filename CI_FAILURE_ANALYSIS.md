@@ -22,6 +22,15 @@ The first missing FastAPI dependency is sufficient to fail every matrix job at
 test collection. The later failures were found only after fixing each preceding
 one in a clean environment.
 
+## Follow-up remote matrix finding
+
+The first pushed fix made Python 3.11–3.13 jobs pass but both Python 3.10 jobs
+failed during dependency installation. Published package metadata identified the
+cause: scikit-learn 1.8, SHAP 0.52, and Matplotlib 3.11 no longer support Python
+3.10. The model artefacts were rebuilt from the existing dataset with
+scikit-learn 1.7.2 and SHAP 0.49.1, and the dependency ranges now select the
+latest releases that support Python 3.10–3.13.
+
 ## Scope
 
 No platform-specific path, shell, line-ending, or scientific-calculation defect

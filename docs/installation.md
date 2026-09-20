@@ -14,5 +14,5 @@ pip install -e ".[dev]"
 - scipy ≥ 1.10.0
 
 Optional:
-- scikit-learn ≥ 1.8, < 1.9 (ML surrogate; required for the bundled model artefacts)
+- scikit-learn ≥ 1.7, < 1.8 (ML surrogate; required for the bundled model artefacts)
 - fastapi, uvicorn (web API)
