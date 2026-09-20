@@ -49,7 +49,7 @@ def test_cli_validate_mocked() -> None:
 
 def test_cli_reproduce_mocked() -> None:
     """Verify osis reproduce invokes research study runner."""
-    with patch("research.run_study.run_full_study") as mock_run:
+    with patch("osis.research.run_full_study") as mock_run:
         code = main(["reproduce"])
         assert code == 0
         mock_run.assert_called_once()

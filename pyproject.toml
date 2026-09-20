@@ -50,7 +50,9 @@ web = [
     "shap>=0.44",
 ]
 ml = [
-    "scikit-learn>=1.3",
+    # The bundled surrogate artefacts were generated with scikit-learn 1.8.
+    # scikit-learn does not guarantee pickle compatibility across minor releases.
+    "scikit-learn>=1.8,<1.9",
     "joblib>=1.3",
     "optuna>=3.5",
     "shap>=0.44",
@@ -58,6 +60,14 @@ ml = [
 dev = [
     "pytest>=7.4",
     "pytest-cov>=4.1",
+    # The full test suite includes FastAPI integration tests and loads the
+    # packaged scikit-learn surrogate models during application startup.
+    "fastapi>=0.110",
+    "httpx2>=2.0",
+    "joblib>=1.3",
+    "scikit-learn>=1.8,<1.9",
+    "shap>=0.44",
+    "matplotlib>=3.7",
     "ruff>=0.3",
     "mypy>=1.8",
 ]

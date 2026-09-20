@@ -81,7 +81,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     elif args.command == "reproduce":
-        from research.run_study import run_full_study
+        from osis.research import run_full_study
         run_full_study()
         return 0
 

@@ -90,7 +90,7 @@ Requires `pip install -e ".[ml]"`. See [`ml/README.md`](ml/) for details.
 ```bash
 pip install -e ".[dev]"
 pytest tests/ -v
-# → 33 passed in ~1.2s
+# → runs unit, API, and end-to-end integration tests
 ```
 
 Tests cover TMM accuracy (Fresnel limit, energy conservation, quarter-wave AR coating, metal reflectance), optics, channel signal, SNR metrics, analysis modules, and full end-to-end integration.

@@ -6,6 +6,13 @@ OSIS uses [Semantic Versioning](https://semver.org/).
 
 ---
 
+## Unreleased
+
+### Fixed
+- Made the `dev` extra self-contained for the full API and physics test suite.
+- Constrained scikit-learn to the 1.8 release series required by the bundled surrogate model artefacts.
+- Made the CLI's research-study loader namespaced so it cannot be shadowed by an unrelated installed `research` package.
+
 ## [1.0.0] — 2026-09-19
 
 ### Added
